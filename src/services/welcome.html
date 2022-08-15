@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html
+  style="
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+    font-size: 14px;
+    margin: 0;
+  "
+>
+  <head>
+    <meta name="viewport" content="width=device-width" />
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8=
+" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin=
+ />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Lato&display=swa=
+p"
+      rel="stylesheet"
+    />
+    <title>{{title}}</title>
+
+    <style style="padding: 0; margin: 0; box-sizing: border-box">
+      body {
+        font-family: "Lato", sans-serif;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        box-sizing: border-box;
+        font-style: normal;
+        font-weight: normal;
+        color: #1c2127;
+        font-size: 13px;
+      }
+      * {
+        padding: 0;
+        margin: 0;
+        box-sizing: border-box;
+      }
+      p {
+        color: #1c2127;
+      }
+
+      p {
+        font-size: 14px;
+        line-height: 143%;
+        letter-spacing: -0.07875px;
+      }
+      a {
+        color: #007de8;
+      }
+
+      .bold {
+        font-weight: bold;
+      }
+      .wrapper {
+        width: 612px;
+        margin: 0px auto;
+      }
+      .header {
+        background-color: #1a1c1f;
+        padding: 48px 56px 37px;
+      }
+      .zeddpay-logo {
+        width: 100%;
+      }
+      .zeddpay-logo img {
+        width: auto;
+        height: 50px;
+      }
+      .heading {
+        width: 100%;
+        margin-top: 80px;
+        font-size: 44px;
+        line-height: 127%;
+        letter-spacing: 0.02px;
+        font-weight: 600;
+        color: #ffffff;
+      }
+
+      .content-wrapper {
+        width: 100%;
+        padding: 0 0 73px;
+      }
+      .content-wrapper > table {
+        border-collapse: collapse;
+      }
+
+      .content-pad-left,
+      .content-pad-right {
+        width: 40px;
+        height: 130px;
+        background-color: #1a1c1f;
+        display: inline-block;
+      }
+
+      .content {
+        width: 532px;
+        padding: 32px;
+        background-color: #fff;
+        border: 1px solid #f9fafa;
+      }
+
+      .content-heading,
+      .content-footer {
+        font-style: normal;
+        font-weight: bold;
+        font-size: 16px;
+        line-height: 22px;
+        letter-spacing: -0.09px;
+      }
+
+      .content-button {
+        background-color: #007de8;
+        padding: 18px 25px;
+        min-width: 181px;
+        text-align: center;
+        border-radius: 4px;
+        margin: 40px 0;
+        color: #fff;
+        border: none;
+        outline: none;
+        font-weight: bold;
+        font-size: 14px;
+        line-height: 20px;
+        letter-spacing: -0.07875px;
+        cursor: pointer;
+        font-family: inherit;
+        text-decoration: none;
+        display: inline-block;
+      }
+
+      .body {
+        width: 100%;
+        margin: 12px 0 48px;
+      }
+      .body p {
+        margin-bottom: 20px;
+      }
+      .lead {
+        margin-bottom: 12px !important;
+      }
+
+      .footer {
+        width: 100%;
+        padding: 61px 54px 51px;
+        text-align: center;
+        background-color: #1a1c1f;
+      }
+
+      .footer-top,
+      .contact,
+      .copy,
+      .social-media {
+        width: 100%;
+      }
+      .contact p,
+      .copy p {
+        color: #8c96a1;
+      }
+      .contact p > a {
+        color: #ffffff;
+      }
+      .footer-top p {
+        color: #ffffff;
+      }
+      .footer-top p,
+      .contact p {
+        margin-bottom: 12px;
+      }
+
+      .contact a {
+        text-decoration: none;
+      }
+
+      .copy {
+        margin-top: 53px;
+      }
+
+      .social-media {
+        margin: 48px 0;
+      }
+      .social-media p a {
+        margin-right: 24px;
+      }
+      .social-media p a img {
+        width: 18px;
+        height: 18px;
+      }
+      .transaction {
+        background: #fcfdff;
+        border-radius: 6px;
+        width: 100%;
+        padding: 16px 16px 1px;
+        margin: 40px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .transaction p {
+        margin-bottom: 15px;
+      }
+
+      .transaction p span {
+        display: inline-block;
+        margin-left: 15px;
+        font-weight: bold;
+      }
+    </style>
+  </head>
+
+  <body
+    style="
+      padding: 0;
+      margin: 0;
+      font-family: 'Matter SQ', -apple-system, BlinkMacSystemFont, 'Segoe U=
+I',
+        Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica', sans-s=
+erif,
+        Verdana;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      box-sizing: border-box;
+      font-style: normal;
+      font-weight: normal;
+      color: #1c2127;
+      font-size: 13px;
+    "
+  >
+    <div
+      class="wrapper"
+      style="padding: 0; box-sizing: border-box; width: 612px; margin: 0p=
+x auto"
+    >
+      <div
+        class="header"
+        style="
+          margin: 0;
+          box-sizing: border-box;
+          background-color: #1a1c1f;
+          padding: 48px 56px 37px;
+        "
+      >
+        <div
+          class="zeddpay-logo"
+          style="padding: 0; margin: 0; box-sizing: border-box; width: 10=
+0%"
+        >
+          <a
+            href="{{url}}"
+            style="
+              padding: 0;
+              margin: 0;
+              box-sizing: border-box;
+              color: #007de8;
+              text-decoration: none;
+            "
+          >
+            <p
+              class="heading"
+              style="
+                padding: 0;
+                margin: 0;
+                box-sizing: border-box;
+                width: 100%;
+                font-size: 20px;
+                line-height: 127%;
+                letter-spacing: 0.02px;
+                font-weight: 600;
+                color: #ffffff;
+              "
+            >
+              <img id="logo" class="img-responsive mobile-logo" src="{{logo}}" alt="{{company}}">
+            </p>
+          </a>
+        </div>
+        <p
+          class="heading"
+          style="
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            width: 100%;
+            margin-top: 80px;
+            font-size: 44px;
+            line-height: 127%;
+            letter-spacing: 0.02px;
+            font-weight: 600;
+            color: #ffffff;
+          "
+        >
+          {{title}}
+        </p>
+      </div>
+      <div
+        class="content-wrapper"
+        style="
+          margin: 0;
+          box-sizing: border-box;
+          width: 100%;
+          padding: 0 0 73px;
+        "
+      >
+        <!-- Email Body -->
+        <table
+          style="
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            border-collapse: collapse;
+          "
+        >
+          <tbody style="padding: 0; margin: 0; box-sizing: border-box">
+            <tr style="padding: 0; margin: 0; box-sizing: border-box">
+              <td
+                style="
+                  padding: 0;
+                  margin: 0;
+                  box-sizing: border-box;
+                  vertical-align: top;
+                "
+              >
+                <div
+                  class="content-pad-left"
+                  style="
+                    padding: 0;
+                    margin: 0;
+                    box-sizing: border-box;
+                    width: 40px;
+                    height: 130px;
+                    background-color: #1a1c1f;
+                    display: inline-block;
+                  "
+                ></div>
+              </td>
+              <td style="padding: 0; margin: 0; box-sizing: border-box">
+                <div
+                  class="content"
+                  style="
+                    margin: 0;
+                    box-sizing: border-box;
+                    width: 532px;
+                    padding: 32px;
+                    background-color: #fff;
+                    border: 1px solid #f9fafa;
+                  "
+                >
+                  <p
+                    class="content-heading"
+                    style="
+                      padding: 0;
+                      margin: 0;
+                      box-sizing: border-box;
+                      color: #1c2127;
+                      font-style: normal;
+                      font-weight: bold;
+                      font-size: 16px;
+                      line-height: 22px;
+                      letter-spacing: -0.09px;
+                    "
+                  >
+                    Hello {{name}},
+                  </p>
+                  <div
+                    class="body"
+                    style="
+                      padding: 0;
+                      box-sizing: border-box;
+                      width: 100%;
+                      margin: 12px 0 48px;
+                    "
+                  >
+                    <p
+                      class="lead bold"
+                      style="
+                        padding: 0;
+                        margin: 0;
+                        box-sizing: border-box;
+                        color: #1c2127;
+                        font-size: 14px;
+                        line-height: 143%;
+                        letter-spacing: -0.07875px;
+                        font-weight: 500;
+                        margin-bottom: 12px !important;
+                      "
+                    >
+                    {{message}}
+                    
+                    </p>
+
+                    <p
+                      style="
+                        padding: 0;
+                        margin: 0;
+                        box-sizing: border-box;
+                        color: #1c2127;
+                        font-size: 14px;
+                        line-height: 143%;
+                        letter-spacing: -0.07875px;
+                        margin-bottom: 20px;
+                      "
+                    >
+                      Please don&apos;t hesitate to contact us if you have any questions or experience any issues.
+                    </p>
+                  </div>
+                  <p
+                    class="content-footer"
+                    style="
+                      padding: 0;
+                      margin: 0;
+                      box-sizing: border-box;
+                      color: #1c2127;
+                      font-style: normal;
+                      font-weight: bold;
+                      font-size: 16px;
+                      line-height: 22px;
+                      letter-spacing: -0.09px;
+                    "
+                  >
+                    Best,<br
+                      style="padding: 0; margin: 0; box-sizing: border-bo=
+x"
+                    />{{company}}
+                  </p>
+                </div>
+              </td>
+              <td
+                style="
+                  padding: 0;
+                  margin: 0;
+                  box-sizing: border-box;
+                  vertical-align: top;
+                "
+              >
+                <div
+                  class="content-pad-right"
+                  style="
+                    padding: 0;
+                    margin: 0;
+                    box-sizing: border-box;
+                    width: 40px;
+                    height: 130px;
+                    background-color: #1a1c1f;
+                    display: inline-block;
+                  "
+                ></div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <div
+        class="footer"
+        style="
+          margin: 0;
+          box-sizing: border-box;
+          width: 100%;
+          padding: 61px 54px 51px;
+          text-align: center;
+          background-color: #1a1c1f;
+        "
+      >
+        <div
+          class="footer-top"
+          style="padding: 0; margin: 0; box-sizing: border-box; width: 10=
+0%"
+        >
+          <p
+            style="
+              padding: 0;
+              margin: 0;
+              box-sizing: border-box;
+              font-size: 14px;
+              line-height: 143%;
+              letter-spacing: -0.07875px;
+              color: #ffffff;
+              margin-bottom: 12px;
+            "
+          >
+          Receive, Send, Create Payment easily with a Twinkle of an eye seamlessly.
+          </p>
+        </div>
+        <div
+          class="social-media"
+          style="
+            padding: 0;
+            box-sizing: border-box;
+            width: 100%;
+            margin: 48px 0;
+          "
+        >
+          <p
+            style="
+              padding: 0;
+              margin: 0;
+              box-sizing: border-box;
+              color: #1c2127;
+              font-size: 14px;
+              line-height: 143%;
+              letter-spacing: -0.07875px;
+            "
+          >
+            <a
+              href="https://twitter.com"
+              style="
+                padding: 0;
+                margin: 0;
+                box-sizing: border-box;
+                color: #007de8;
+                margin-right: 24px;
+              "
+              ><img
+                src="https://static.trybrass.com/assets/images/social-icons/twitter.png"
+                alt="Twitter"
+                style="
+                  padding: 0;
+                  margin: 0;
+                  box-sizing: border-box;
+                  width: 18px;
+                  height: 18px;
+                "
+            /></a>
+            <a
+              href="https://instagram.com"
+              style="
+                padding: 0;
+                margin: 0;
+                box-sizing: border-box;
+                color: #007de8;
+                margin-right: 24px;
+              "
+              ><img
+                src="https://static.trybrass.com/assets/images/social-icons/instagram.png"
+                alt="Twitter"
+                style="
+                  padding: 0;
+                  margin: 0;
+                  box-sizing: border-box;
+                  width: 18px;
+                  height: 18px;
+                "
+            /></a>
+          </p>
+        </div>
+        <div
+          class="contact"
+          style="padding: 0; margin: 0; box-sizing: border-box; width: 10=
+0%"
+        >
+          <p
+            style="
+              padding: 0;
+              margin: 0;
+              box-sizing: border-box;
+              font-size: 14px;
+              line-height: 143%;
+              letter-spacing: -0.07875px;
+              color: #8c96a1;
+              margin-bottom: 12px;
+            "
+          >
+            Visit us today at
+            <span style="padding: 0; margin: 0; box-sizing: border-box"></span>
+            <a
+              href="{{url}}"
+              style="
+                padding: 0;
+                margin: 0;
+                box-sizing: border-box;
+                text-decoration: none;
+                color: #ffffff;
+              "
+              >{{company}}</a
+            >
+          </p>
+        </div>
+        <div
+          class="copy"
+          style="
+            padding: 0;
+            margin: 0;
+            box-sizing: border-box;
+            width: 100%;
+            margin-top: 53px;
+          "
+        >
+          <p
+            style="
+              padding: 0;
+              margin: 0;
+              box-sizing: border-box;
+              font-size: 14px;
+              line-height: 143%;
+              letter-spacing: -0.07875px;
+              color: #8c96a1;
+            "
+          >
+            &copy; 2022 {{company}}, All rights reserved.
+          </p>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>

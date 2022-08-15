@@ -1,0 +1,60 @@
+Arguments: 
+  /home/osibisa/.nvm/versions/node/v18.0.0/bin/node /usr/share/yarn/bin/yarn.js add electron-builder --dev
+
+PATH: 
+  /home/osibisa/.bun/bin:/home/osibisa/.nvm/versions/node/v18.0.0/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin:/usr/local/games:/usr/games
+
+Yarn version: 
+  1.22.19
+
+Node version: 
+  18.0.0
+
+Platform: 
+  linux x64
+
+Trace: 
+  Error: connect ENETUNREACH 104.16.21.35:443
+      at TCPConnectWrap.afterConnect [as oncomplete] (node:net:1195:16)
+
+npm manifest: 
+  {
+    "name": "Raypal",
+    "version": "1.0.0",
+    "description": "",
+    "main": "./src/app.js",
+    "scripts": {
+      "start": "node src/app.js",
+      "dev": "nodemon src/app.js",
+      "test": "jest"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "devDependencies": {
+      "jest": "^28.1.3",
+      "nodemon": "^2.0.16"
+    },
+    "dependencies": {
+      "bcryptjs": "^2.4.3",
+      "body-parser": "^1.20.0",
+      "cookie-parser": "^1.4.6",
+      "cors": "^2.8.5",
+      "dotenv": "^16.0.0",
+      "express": "^4.18.1",
+      "express-rate-limit": "^6.4.0",
+      "http-status": "^1.5.1",
+      "https": "^1.0.0",
+      "jsonwebtoken": "^8.5.1",
+      "moment": "^2.29.3",
+      "mongoose": "^6.4.4",
+      "rimraf": "^3.0.2",
+      "socket.io": "^4.5.1"
+    }
+  }
+
+yarn manifest: 
+  No manifest
+
+Lockfile: 
+  No lockfile

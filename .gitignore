@@ -1,0 +1,16 @@
+# Node Modules
+
+/node_modules
+
+# ENV
+
+# development env
+.env
+
+# temp tests file
+
+test.js
+
+# prisma schema/migration
+
+/prisma/migrations
