@@ -1,11 +1,3 @@
-const {
-    User,
-    Wallets,
-    Accounts,
-    Transactions,
-    Products,
-    PaymentLinks,
-} = require("../model");
 const { genHash, compareHash, genId, genUnique } = require("../helpers");
 const sendResponse = require("../helpers/response");
 const { validateEmail, validatePhonenumber } = require("../utils/validate");

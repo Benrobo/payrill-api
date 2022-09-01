@@ -1,4 +1,4 @@
-const { randomUUID, randomBytes } = require("crypto");
+const { randomUUID, randomBytes, createHmac } = require("crypto");
 const bcryptjs = require("bcryptjs");
 
 const genId = () => randomUUID();
@@ -6,6 +6,12 @@ const genId = () => randomUUID();
 const genHash = (salt = 10, string) => {
   return bcryptjs.hashSync(salt, string);
 };
+
+const secret = 'abcdefg';
+
+const toHash = (text) => {
+    return createHmac('sha256', secret).update(text).digest('hex');
+}
 
 const compareHash = (string, hash) => {
   return bcryptjs.compareSync(string, hash);
@@ -24,5 +30,6 @@ module.exports = {
   genId,
   genHash,
   compareHash,
-  genUnique
+  genUnique,
+  toHash
 }

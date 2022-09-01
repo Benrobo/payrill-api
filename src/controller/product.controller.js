@@ -1,4 +1,3 @@
-const { User, Wallets, Accounts, Transactions, Products } = require("../model");
 const { genHash, compareHash, genId, genUnique } = require("../helpers");
 const sendResponse = require("../helpers/response");
 
