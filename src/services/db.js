@@ -8,7 +8,9 @@ let database = process.env.DATABASE;
 
 
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
+    connectionLimit: 10,
+    acquireTimeout: 30000, //30 secs
     host: host || "localhost",
     user: user || "root",
     password: password || "",
@@ -16,7 +18,7 @@ const connection = mysql.createConnection({
     // port: '/var/run/mysqld/mysqld.sock'  // hack
 });
 
-connection.connect((err) => {
+connection.getConnection((err) => {
     if (err) {
         return console.log(err)
     }
