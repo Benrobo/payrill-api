@@ -319,7 +319,7 @@ class AuthControler {
                             // Save user data
                             db.query(
                                 {
-                                    sql: "INSERT INTO users(id,name,username,type,email,country,currency,token,password,ewallet,pin,issuing_id,card_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?)",
+                                    sql: "INSERT INTO users(id,name,username,type,email,country,currency,token,password,ewallet,pin,issuing_id,card_id,contact_id) VALUES(?,?,?,?,?,?,?,?,?,?,?,?,?,?)",
                                     timeout: 40000,
                                     values: [
                                         userId || "",
@@ -335,6 +335,7 @@ class AuthControler {
                                         toHash(pin) || "",
                                         issuing_id,
                                         cardId,
+                                        contactId
                                     ],
                                 },
                                 function (error, results, fields) {

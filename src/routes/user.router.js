@@ -23,4 +23,10 @@ Router.post("/transfer/:receiverId", isLoggedIn, (req, res) => {
     User.transferFund(res, payload, receiverId);
 });
 
+// Pay
+Router.post("/pay", isLoggedIn, (req, res) => {
+    const payload = req.body;
+    User.pay(res, payload);
+});
+
 module.exports = Router;

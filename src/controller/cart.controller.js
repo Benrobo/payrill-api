@@ -43,6 +43,7 @@ class CartControler {
                         );
                     }
                     let ecart = results[0];
+                    const storeId = ecart.store_id;
                     db.query(
                         {
                             sql: "SELECT * FROM checkout WHERE (ecart_id = ?)",
@@ -51,13 +52,28 @@ class CartControler {
                         },
                         function (error, results, fields) {
                             ecart.items = results;
-                            return sendResponse(
-                                res,
-                                200,
-                                true,
-                                "Ecart Fetched",
-                                ecart
+
+                            // Get Store Info
+                            db.query(
+                                {
+                                    sql: "SELECT * FROM stores WHERE (id = ?)",
+                                    timeout: 40000,
+                                    values: [storeId],
+                                },
+                                function (error, results, fields) {
+                                    const store = results[0];
+                                    ecart.store = store;
+
+                                    return sendResponse(
+                                        res,
+                                        200,
+                                        true,
+                                        "Ecart Fetched",
+                                        ecart
+                                    );
+                                }
                             );
+                            
                         }
                     );
                 }
@@ -160,7 +176,7 @@ class CartControler {
                                 db.query({
                                     sql: "UPDATE store_items SET item_quantity = ? WHERE (id = ?)",
                                     timeout: 40000,
-                                    values: [newQuantity,itemId],
+                                    values: [newQuantity, itemId],
                                 });
                             }
                         );
@@ -191,11 +207,11 @@ class CartControler {
         const { id } = res.user;
         let { cartId, itemId, quantity } = payload;
 
-        if(quantity === undefined){
+        if (quantity === undefined) {
             quantity = 1;
         }
 
-        if(quantity == 0){
+        if (quantity == 0) {
             return this.removeFromEcart(res, payload);
         }
 
@@ -273,7 +289,10 @@ class CartControler {
                                 },
                                 function (error, results) {
                                     if (results.length == 0) {
-                                        if (item.item_quantity < Number(quantity)) {
+                                        if (
+                                            item.item_quantity <
+                                            Number(quantity)
+                                        ) {
                                             return sendResponse(
                                                 res,
                                                 400,

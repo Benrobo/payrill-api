@@ -9,6 +9,7 @@ const io = new Server(server);
 
 const { customlimiter } = require("./middlewares/rateLimiting");
 const authRouter = require("./routes/auth.router");
+const cardRouter = require("./routes/card.router");
 const cartRouter = require("./routes/cart.router");
 const itemRouter = require("./routes/item.router");
 const userRouter = require("./routes/user.router");
@@ -58,6 +59,9 @@ app.get("/api/countries", async (req, res) => {
 
 // Authentication
 app.use("/api/auth", authRouter);
+
+// Card
+app.use("/api/card", cardRouter);
 
 // Cart
 app.use("/api/cart", cartRouter);

@@ -18,4 +18,11 @@ Router.post("/add", isLoggedIn, (req, res) => {
     Item.addItem(res, payload);
 });
 
+// Add Item
+Router.post("/update/:itemId", isLoggedIn, (req, res) => {
+    const payload = req.body;
+    const itemId = req.params.itemId;
+    Item.updateItem(res, payload, itemId);
+});
+
 module.exports = Router;

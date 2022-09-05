@@ -1,3 +1,5 @@
+const { genId, toHash } = require("../helpers");
+const { createTransaction } = require("../services/transaction");
 const sendResponse = require("../helpers/response");
 const Fetch = require("../utils/fetch");
 const db = require("../services/db");
@@ -23,32 +25,40 @@ class UserControler {
         );
     }
 
-    async getCard(res){
+    async pay(res, payload) {
         const { id } = res.user;
+        let { type, amount, pin, currency } = payload;
+
         db.query(
             {
-                sql: "SELECT card_id FROM users WHERE (id = ?)",
+                sql: "SELECT pin, ewallet, currency FROM users WHERE id = ?",
                 timeout: 40000,
                 values: [id],
             },
             async function (error, results, fields) {
-                const cardId = results[0].card_id;
+                if (toHash(String(pin)) === results[0].pin) {
+                    const ewallet = results[0].ewallet;
+                    currency = currency || results[0].currency;
+                    const newPayload = {
+                        ewallet,
+                        currency,
+                        amount,
+                        metadata: { type },
+                    };
+                    try {
+                        let result = await Fetch(
+                            "POST",
+                            "/v1/account/withdraw",
+                            newPayload
+                        );
+                        let status = result.statusCode == 200 ? true : false;
+                    } catch (e) {
+                        sendResponse(res, 400, false, "An Error Occurred", e);
+                    }
 
-                let result = await Fetch(
-                    "GET",
-                    "/v1/issuing/cards/" + cardId
-                );
-
-                delete result.body.data.ewallet_contact;
-                const card = result.body.data;
-
-                return sendResponse(
-                    res,
-                    200,
-                    true,
-                    "User Card",
-                    card
-                );
+                } else {
+                    sendResponse(res, 400, false, "Incorrect Pin", {});
+                }
             }
         );
     }
