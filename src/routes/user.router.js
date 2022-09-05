@@ -7,7 +7,7 @@ const Router = express.Router();
 const User = new UserControler();
 
 // Get Transactions
-Router.get("/transactions", isLoggedIn, (req, res) => {
+Router.post("/transactions", isLoggedIn, (req, res) => {
     User.transactions(res);
 });
 
