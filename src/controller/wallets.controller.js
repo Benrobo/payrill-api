@@ -89,7 +89,7 @@ class WalletController {
         // check if users exists first
         const userId = res.user.id;
 
-        if (id !== userId)
+        if (id.trim() !== userId)
             return sendResponse(
                 res,
                 404,
@@ -101,7 +101,7 @@ class WalletController {
             {
                 sql: "SELECT * FROM users WHERE (id = ?)",
                 timeout: 40000,
-                values: [id],
+                values: [id.trim()],
             },
             async function (error, results) {
                 const ewallet = results[0].ewallet;
@@ -180,7 +180,7 @@ class WalletController {
                 {
                     sql: "SELECT id,ewallet,username FROM users WHERE ewallet in (?,?) GROUP BY id",
                     timeout: 40000,
-                    values: [from,to],
+                    values: [from, to],
                 },
                 function (error, results) {
                     console.log(error, results);
@@ -197,7 +197,7 @@ class WalletController {
                         }
                         const title = "Transfer to " + username;
 
-                        createTransaction(transactionId,sender,receiver,amount,currency,type,title);
+                        createTransaction(transactionId, sender, receiver, amount, currency, type, title);
                     }
                 }
             );
@@ -325,8 +325,7 @@ class WalletController {
                 email,
                 "Refund Failed",
                 `
-                Your Refund Request of <b>${
-                    paid - totalAmount
+                Your Refund Request of <b>${paid - totalAmount
                 } ${currency}</b> has failed.<br>
                 Contact The merchant to get your refund manually.<br>
                 Thanks for using RayPal.<br>
