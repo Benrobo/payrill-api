@@ -116,17 +116,21 @@ class AuthControler {
                     const refreshToken = genRefreshToken(userPayload);
                     const accessToken = genAccessToken(userPayload);
 
-                    const filter = {
-                        email,
-                    };
-                    const update = {
-                        token: refreshToken,
-                    };
+                    // update token columnin users table
+                    const query = `UPDATE users SET token=? WHERE (email=?)`;
+                    db.query({
+                        sql: query,
+                        values: [refreshToken, email]
+                    }, (err, result, fields) => {
+                        if (err)
+                            return sendResponse(res, 500, false, "An Error Occured!");
 
-                    return sendResponse(res, 200, true, "Login Successful", {
-                        ...userPayload,
-                        accessToken,
-                    });
+                        return sendResponse(res, 200, true, "Login Successful", {
+                            ...userPayload,
+                            accessToken,
+                        });
+                    })
+
                 } catch (e) {
                     console.log(e);
                     sendResponse(
@@ -226,7 +230,7 @@ class AuthControler {
                         email,
                         contact: {
                             first_name: firstName,
-                            last_name: lastName,
+                            last_name: lastName === "" ? firstName : lastName,
                             contact_type: "personal",
                             country,
                             currency,
