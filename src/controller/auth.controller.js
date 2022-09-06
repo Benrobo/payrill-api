@@ -10,9 +10,8 @@ const Fetch = require("../utils/fetch");
 const db = require("../services/db");
 
 class AuthControler {
-    #parseUserName(username) {
-        console.log(username);
-        const parse = username.split(" ");
+    #parseUserName(fullname) {
+        const parse = fullname.split(" ");
         let firstName = parse[0];
         let lastName = parse.length > 1 ? parse[1] : "";
         return {
@@ -117,17 +116,21 @@ class AuthControler {
                     const refreshToken = genRefreshToken(userPayload);
                     const accessToken = genAccessToken(userPayload);
 
-                    const filter = {
-                        email,
-                    };
-                    const update = {
-                        token: refreshToken,
-                    };
+                    // update token columnin users table
+                    const query = `UPDATE users SET token=? WHERE (email=?)`;
+                    db.query({
+                        sql: query,
+                        values: [refreshToken, email]
+                    }, (err, result, fields) => {
+                        if (err)
+                            return sendResponse(res, 500, false, "An Error Occured!");
 
-                    return sendResponse(res, 200, true, "Login Successful", {
-                        ...userPayload,
-                        accessToken,
-                    });
+                        return sendResponse(res, 200, true, "Login Successful", {
+                            ...userPayload,
+                            accessToken,
+                        });
+                    })
+
                 } catch (e) {
                     console.log(e);
                     sendResponse(
@@ -166,8 +169,7 @@ class AuthControler {
             country,
             currency,
             type,
-            first_name,
-            last_name,
+            fullname,
         } = payload;
 
         if (email === "") {
@@ -176,6 +178,10 @@ class AuthControler {
 
         if (username === "") {
             return sendResponse(res, 400, false, "username is missing");
+        }
+
+        if (fullname === "") {
+            return sendResponse(res, 400, false, "fullname is missing");
         }
 
         if (password === "") {
@@ -216,19 +222,15 @@ class AuthControler {
 
                 try {
                     // Create Wallet
-                    const { firstName, lastName } = {
-                        firstName: first_name,
-                        lastName: last_name,
-                    };
-                    let combo = `${firstName}${
-                        lastName === "" ? "" : "-" + lastName
-                    }`;
+                    const { firstName, lastName } = self.#parseUserName(fullname)
+                    let combo = `${firstName}${lastName === "" ? "" : "-" + lastName
+                        }`;
                     const refId = `${combo}-${self.#genUniqueNumber(6)}`;
                     const walletPayload = {
                         email,
                         contact: {
                             first_name: firstName,
-                            last_name: lastName,
+                            last_name: lastName === "" ? firstName : lastName,
                             contact_type: "personal",
                             country,
                             currency,
@@ -372,12 +374,12 @@ class AuthControler {
                             res,
                             500,
                             false,
-                            `Something went wrong when registering: ${
-                                e.body?.status.message || e.mesage || e
+                            `Something went wrong when registering: ${e.body?.status.message || e.mesage || e
                             }`
                         );
                     }
                 } catch (e) {
+                    console.log(e)
                     sendResponse(
                         res,
                         500,

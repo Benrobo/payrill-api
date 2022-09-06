@@ -89,7 +89,7 @@ class WalletController {
         // check if users exists first
         const userId = res.user.id;
 
-        if (id !== userId)
+        if (id.trim() !== userId)
             return sendResponse(
                 res,
                 404,
@@ -101,7 +101,7 @@ class WalletController {
             {
                 sql: "SELECT * FROM users WHERE (id = ?)",
                 timeout: 40000,
-                values: [id],
+                values: [id.trim()],
             },
             async function (error, results) {
                 const ewallet = results[0].ewallet;
@@ -197,6 +197,7 @@ class WalletController {
                         }
                         const title = "Transfer to " + username;
 
+<<<<<<< HEAD
                         createTransaction(
                             transactionId,
                             sender,
@@ -206,6 +207,9 @@ class WalletController {
                             type,
                             title
                         );
+=======
+                        createTransaction(transactionId, sender, receiver, amount, currency, type, title);
+>>>>>>> 3bac23ecca34877276fdbad0fbb2d132ab04d2f4
                     }
                 }
             );
