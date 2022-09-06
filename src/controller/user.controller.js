@@ -27,7 +27,8 @@ class UserControler {
 
     async pay(res, payload) {
         const { id } = res.user;
-        let { type, amount, pin, currency } = payload;
+        let { type, amount, pin, currency, crypto } = payload;
+        console.log(type);
 
         db.query(
             {
@@ -39,12 +40,16 @@ class UserControler {
                 if (toHash(String(pin)) === results[0].pin) {
                     const ewallet = results[0].ewallet;
                     currency = currency || results[0].currency;
-                    const newPayload = {
+                    let newPayload = {
                         ewallet,
                         currency,
                         amount,
-                        metadata: { type },
+                        metadata: {},
                     };
+                    newPayload.metadata.type = type;
+                    if (crypto) {
+                        newPayload.metadata.crypto = crypto;
+                    }
                     try {
                         let result = await Fetch(
                             "POST",
@@ -52,10 +57,14 @@ class UserControler {
                             newPayload
                         );
                         let status = result.statusCode == 200 ? true : false;
+                        sendResponse(res, 200, true, result.body);
                     } catch (e) {
-                        sendResponse(res, 400, false, "An Error Occurred", e);
+                        let message = "An Error Occurred";
+                        if (e.body.status.error_code == "NOT_ENOUGH_FUNDS") {
+                            message = "Insufficient Funds";
+                        }
+                        sendResponse(res, 400, false, message, e.body || e);
                     }
-
                 } else {
                     sendResponse(res, 400, false, "Incorrect Pin", {});
                 }

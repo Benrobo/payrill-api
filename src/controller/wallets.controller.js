@@ -180,7 +180,7 @@ class WalletController {
                 {
                     sql: "SELECT id,ewallet,username FROM users WHERE ewallet in (?,?) GROUP BY id",
                     timeout: 40000,
-                    values: [from,to],
+                    values: [from, to],
                 },
                 function (error, results) {
                     console.log(error, results);
@@ -197,7 +197,15 @@ class WalletController {
                         }
                         const title = "Transfer to " + username;
 
-                        createTransaction(transactionId,sender,receiver,amount,currency,type,title);
+                        createTransaction(
+                            transactionId,
+                            sender,
+                            receiver,
+                            amount,
+                            currency,
+                            type,
+                            title
+                        );
                     }
                 }
             );
@@ -238,99 +246,42 @@ class WalletController {
                 }
             );
         } else if (
-            payload.type === "BENEFICIARY_CREATED" &&
+            payload.type === "EWALLET_REMOVED_FUNDS" &&
             payload.status === "NEW"
         ) {
-            const beneficiaryId = payload.data.id;
-            const merchantId = payload.data.merchant_reference_id;
-            let { tranId, payout } = await Refund.findOne({
-                merchantId,
-            });
-            const { userId, paid, totalAmount, currency, country } =
-                await Transactions.findOne({
-                    id: tranId,
-                });
-            const { currency: sellerCurrency, country: sellerCountry } =
-                await User.findOne({
-                    id: userId,
-                });
-            const { wId } = await Wallets.findOne({
-                userId,
-            });
+            const transactionId = payload.id;
+            const amount = Math.abs(payload.data.last_transaction_amount);
+            const ewallet = payload.data.id;
+            const currency = payload.data.last_transaction_currency;
+            const type = payload.data.metadata.type;
+            let title = "";
 
-            try {
-                // Create Sender
-                const senderPayload = {
-                    country: sellerCountry,
-                    currency: sellerCurrency,
-                    entity_type: "company",
-                    company_name: "RayPal",
-                    payment_type: "priority",
-                    identification_type: "company registered number",
-                    identification_value: "10207686",
-                    // phone_number: "442037443095",
-                    occupation: "transportation",
-                    source_of_income: "business",
-                    // date_of_birth: "31/07/1984",
-                    // address: "123 Main Street London",
-                    purpose_code: "refund",
-                    beneficiary_relationship: "client",
-                };
-                const result = await Fetch(
-                    "POST",
-                    "/v1/payouts/sender",
-                    senderPayload
-                );
-                const senderId = result.body.data.id;
-                const refundAmount = Number(paid) - Number(totalAmount);
-                payout = payout || "us_general_bank";
-                console.log(payout);
-
-                // Create Payout
-                const payoutPayload = {
-                    ewallet: wId,
-                    payout_amount: refundAmount,
-                    // payout_method_type: payout,
-                    sender_currency: sellerCurrency,
-                    sender_country: sellerCountry,
-                    beneficiary_country: country,
-                    payout_currency: currency,
-                    sender_entity_type: "company",
-                    payment_type: "priority",
-                    beneficiary_entity_type: "individual",
-                    beneficiary: beneficiaryId,
-                    sender: senderId,
-                    confirm_automatically: true,
-                    description: "Refund from RayPal",
-                };
-                const res = await Fetch("POST", "/v1/payouts", payoutPayload);
-                console.log(res);
-            } catch (e) {
-                console.log(e);
+            if(type == "crypto"){
+                title = payload.data.metadata.crypto;
             }
-        } else if (
-            payload.type === "PAYOUT_FAILED" &&
-            payload.status === "NEW"
-        ) {
-            const merchantId = payload.data.beneficiary.merchant_reference_id;
-            let { tranId } = await Refund.findOne({
-                merchantId,
-            });
-            const { name, email, paid, totalAmount, currency } =
-                await Transactions.findOne({
-                    id: tranId,
-                });
-            sendMail(
-                name,
-                email,
-                "Refund Failed",
-                `
-                Your Refund Request of <b>${
-                    paid - totalAmount
-                } ${currency}</b> has failed.<br>
-                Contact The merchant to get your refund manually.<br>
-                Thanks for using RayPal.<br>
-            `
+
+            db.query(
+                {
+                    sql: "SELECT id FROM users WHERE (ewallet = ?)",
+                    timeout: 40000,
+                    values: [ewallet],
+                },
+                function (error, results) {
+                    if (results.length != 0) {
+                        let receiver = results[0].id;
+                        let sender = "";
+
+                        createTransaction(
+                            transactionId,
+                            sender,
+                            receiver,
+                            amount,
+                            currency,
+                            type,
+                            title
+                        );
+                    }
+                }
             );
         }
 
