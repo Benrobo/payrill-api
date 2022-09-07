@@ -15,7 +15,7 @@ const itemRouter = require("./routes/item.router");
 const userRouter = require("./routes/user.router");
 const walletRouter = require("./routes/wallets.router");
 const productRouter = require("./routes/product.router");
-const transactionRouter = require("./routes/transaction.router");
+const storeRouter = require("./routes/store.router");
 const paymentLink = require("./routes/payment.router");
 const Fetch = require("./utils/fetch");
 const { DATABASE_URL } = require("./config");
@@ -80,7 +80,7 @@ app.use("/api/wallet", walletRouter);
 app.use("/api/product", productRouter);
 
 // Transaction
-app.use("/api/transaction", transactionRouter);
+app.use("/api/store", storeRouter);
 
 // PaymentLink
 app.use("/api/payment/link", paymentLink);
