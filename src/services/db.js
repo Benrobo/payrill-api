@@ -9,9 +9,9 @@ let mysql = require("mysql");
 const connection = mysql.createConnection({
     host: host || "localhost",
     user: user || "root",
-    password: password || "root",
+    password: password || "",
     database: database || "payrill",
-    port: '/var/run/mysqld/mysqld.sock'  // hack
+    // port: '/var/run/mysqld/mysqld.sock'  // hack
 });
 
 connection.connect();
