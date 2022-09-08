@@ -42,7 +42,6 @@ class UserControler {
     async pay(res, payload) {
         const { id } = res.user;
         let { type, amount, pin, currency, crypto } = payload;
-        console.log(type);
 
         db.query(
             {

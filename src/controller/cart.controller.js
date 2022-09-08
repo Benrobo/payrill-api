@@ -1,5 +1,5 @@
 const sendResponse = require("../helpers/response");
-const { genId } = require("../helpers");
+const { genId, toHash } = require("../helpers");
 const Fetch = require("../utils/fetch");
 const db = require("../services/db");
 
@@ -28,7 +28,7 @@ class CartControler {
                         },
                         function (error, results, fields) {
                             const store = results[0];
-                            const data = {ecarts, store};
+                            const data = { ecarts, store };
 
                             return sendResponse(
                                 res,
@@ -89,12 +89,67 @@ class CartControler {
                                     );
                                 }
                             );
-                            
                         }
                     );
                 }
             );
         }
+    }
+
+    async refundCart(res, payload){
+        
+    }
+
+    async transferCart(res, payload) {
+        const { id } = res.user;
+        const { cartId, pin, to } = payload;
+
+        if(pin == undefined){
+            sendResponse(res, 400, false, "Pin required", {});
+        }
+
+        db.query(
+            {
+                sql: "SELECT * FROM ecart WHERE (id = ? AND user_id = ?)",
+                timeout: 40000,
+                values: [cartId, id],
+            },
+            function (error, results) {
+                if (results.length == 0) {
+                    return sendResponse(
+                        res,
+                        400,
+                        false,
+                        "Access to Cart Denied or Cart Not Found",
+                        {}
+                    );
+                }
+
+                db.query(
+                    {
+                        sql: "SELECT pin FROM users WHERE id = ?",
+                        timeout: 40000,
+                        values: [id],
+                    },
+                    function (error, results, fields) {
+                        if (toHash(String(pin)) === results[0].pin) {
+                            db.query(
+                                {
+                                    sql: "UPDATE ecart SET user_id = ? WHERE (id = ? AND user_id = ?)",
+                                    timeout: 40000,
+                                    values: [to, cartId, id],
+                                },
+                                function (error, results) {
+                                    sendResponse(res, 200, true, "Cart Transfered", {});
+                                }
+                            );
+                        } else {
+                            sendResponse(res, 400, false, "Incorrect Pin", {});
+                        }
+                    }
+                );
+            }
+        );
     }
 
     async createEcart(res) {
