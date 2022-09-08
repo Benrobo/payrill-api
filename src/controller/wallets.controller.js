@@ -89,7 +89,9 @@ class WalletController {
         // check if users exists first
         const userId = res.user.id;
 
-        if (id.trim() !== userId)
+        if (id.trim() !== userId){
+            
+        }
             // return sendResponse(
             //     res,
             //     400,
