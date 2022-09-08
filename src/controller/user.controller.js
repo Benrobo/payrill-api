@@ -13,7 +13,7 @@ class UserControler {
                 timeout: 40000,
                 values: [id, id],
             },
-            function (error, results, fields) {
+            function (error, results) {
                 return sendResponse(
                     res,
                     200,
@@ -88,7 +88,7 @@ class UserControler {
 
     async transferFund(res, payload, recieverId) {
         const { id } = res.user;
-        const { pin } = payload;
+        let { pin, currency } = payload;
 
         if (id == recieverId) {
             return sendResponse(
@@ -123,14 +123,14 @@ class UserControler {
                                     {}
                                 );
                             }
-                            let sender, reciever, currency;
+                            let sender, reciever;
                             if (results[0].id == id) {
                                 sender = results[0].ewallet;
-                                currency = results[0].currency;
+                                currency = currency || results[0].currency;
                                 reciever = results[1].ewallet;
                             } else {
                                 sender = results[1].ewallet;
-                                currency = results[1].currency;
+                                currency = currency || results[1].currency;
                                 reciever = results[0].ewallet;
                             }
                             payload["source_ewallet"] = sender;
@@ -145,7 +145,7 @@ class UserControler {
                                 );
                                 let status =
                                     result.statusCode == 200 ? true : false;
-                                return sendResponse(res, 200, true, "", result);
+                                return sendResponse(res, 200, true, "", result.body.data);
                             } catch (e) {
                                 console.log(e);
                                 return sendResponse(
@@ -158,6 +158,8 @@ class UserControler {
                             }
                         }
                     );
+                } else {
+                    sendResponse(res, 400, false, "Incorrect Pin", {});
                 }
             }
         );
