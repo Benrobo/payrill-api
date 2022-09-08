@@ -29,4 +29,9 @@ Router.post("/pay", isLoggedIn, (req, res) => {
     User.pay(res, payload);
 });
 
+// Get All Users
+Router.get("/all", isLoggedIn, (req, res) => {
+    User.getAllUsers(res);
+});
+
 module.exports = Router;

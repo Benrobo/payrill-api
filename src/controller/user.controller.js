@@ -13,7 +13,7 @@ class UserControler {
                 timeout: 40000,
                 values: [id, id],
             },
-            function (error, results, fields) {
+            function (error, results) {
                 return sendResponse(
                     res,
                     200,
@@ -21,6 +21,20 @@ class UserControler {
                     "User Transactions",
                     results
                 );
+            }
+        );
+    }
+
+    async getAllUsers(res) {
+        const { id } = res.user;
+        db.query(
+            {
+                sql: "SELECT id,name,username FROM users WHERE (id != ?)",
+                timeout: 40000,
+                values: [id],
+            },
+            function (error, results, fields) {
+                return sendResponse(res, 200, true, "All Users", results);
             }
         );
     }
@@ -74,6 +88,7 @@ class UserControler {
 
     async transferFund(res, payload, recieverId) {
         const { id } = res.user;
+        let { pin, currency } = payload;
 
         if (id == recieverId) {
             return sendResponse(
@@ -86,51 +101,65 @@ class UserControler {
         }
         db.query(
             {
-                sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?) GROUP BY ewallet",
+                sql: "SELECT pin, ewallet, currency FROM users WHERE id = ?",
                 timeout: 40000,
-                values: [id, recieverId],
+                values: [id],
             },
             async function (error, results, fields) {
-                if (results.length == 0) {
-                    return sendResponse(
-                        res,
-                        400,
-                        false,
-                        "An Error Occured",
-                        {}
+                if (toHash(String(pin)) === results[0].pin) {
+                    db.query(
+                        {
+                            sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?) GROUP BY ewallet",
+                            timeout: 40000,
+                            values: [id, recieverId],
+                        },
+                        async function (error, results, fields) {
+                            if (results.length == 0) {
+                                return sendResponse(
+                                    res,
+                                    400,
+                                    false,
+                                    "An Error Occured",
+                                    {}
+                                );
+                            }
+                            let sender, reciever;
+                            if (results[0].id == id) {
+                                sender = results[0].ewallet;
+                                currency = currency || results[0].currency;
+                                reciever = results[1].ewallet;
+                            } else {
+                                sender = results[1].ewallet;
+                                currency = currency || results[1].currency;
+                                reciever = results[0].ewallet;
+                            }
+                            payload["source_ewallet"] = sender;
+                            payload["destination_ewallet"] = reciever;
+                            payload["currency"] = currency;
+                            console.log(payload);
+                            try {
+                                let result = await Fetch(
+                                    "POST",
+                                    "/v1/account/transfer",
+                                    payload
+                                );
+                                let status =
+                                    result.statusCode == 200 ? true : false;
+                                return sendResponse(res, 200, true, "", result.body.data);
+                            } catch (e) {
+                                console.log(e);
+                                return sendResponse(
+                                    res,
+                                    400,
+                                    false,
+                                    "An Error Occured",
+                                    e.body
+                                );
+                            }
+                        }
                     );
-                }
-                let sender, reciever, currency;
-                if (results[0].id == id) {
-                    sender = results[0].ewallet;
-                    currency = results[0].currency;
-                    reciever = results[1].ewallet;
                 } else {
-                    sender = results[1].ewallet;
-                    currency = results[1].currency;
-                    reciever = results[0].ewallet;
-                }
-                payload["source_ewallet"] = sender;
-                payload["destination_ewallet"] = reciever;
-                payload["currency"] = currency;
-                console.log(payload);
-                try {
-                    let result = await Fetch(
-                        "POST",
-                        "/v1/account/transfer",
-                        payload
-                    );
-                    let status = result.statusCode == 200 ? true : false;
-                    return sendResponse(res, 200, true, "", result);
-                } catch (e) {
-                    console.log(e);
-                    return sendResponse(
-                        res,
-                        400,
-                        false,
-                        "An Error Occured",
-                        e.body
-                    );
+                    sendResponse(res, 400, false, "Incorrect Pin", {});
                 }
             }
         );

@@ -195,7 +195,7 @@ class WalletController {
                             receiver = results[0].id;
                             username = results[0].username;
                         }
-                        const title = "Transfer to " + username;
+                        const title = "Transfer to " + username
                         createTransaction(
                             transactionId,
                             sender,

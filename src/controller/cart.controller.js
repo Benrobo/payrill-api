@@ -16,12 +16,28 @@ class CartControler {
                     values: [id],
                 },
                 function (error, results, fields) {
-                    return sendResponse(
-                        res,
-                        200,
-                        true,
-                        "Fetched All Ecart",
-                        results
+                    let ecarts = results;
+                    const storeId = ecarts[0].store_id;
+
+                    // Get Store Info
+                    db.query(
+                        {
+                            sql: "SELECT * FROM stores WHERE (id = ?)",
+                            timeout: 40000,
+                            values: [storeId],
+                        },
+                        function (error, results, fields) {
+                            const store = results[0];
+                            const data = {ecarts, store};
+
+                            return sendResponse(
+                                res,
+                                200,
+                                true,
+                                "Fetched All Ecart",
+                                data
+                            );
+                        }
                     );
                 }
             );

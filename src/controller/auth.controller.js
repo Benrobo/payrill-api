@@ -172,31 +172,31 @@ class AuthControler {
             fullname,
         } = payload;
 
-        if (email === "") {
+        if (email === undefined) {
             return sendResponse(res, 400, false, "email is missing");
         }
 
-        if (username === "") {
+        if (username === undefined) {
             return sendResponse(res, 400, false, "username is missing");
         }
 
-        if (fullname === "") {
+        if (fullname === undefined) {
             return sendResponse(res, 400, false, "fullname is missing");
         }
 
-        if (password === "") {
+        if (password === undefined) {
             return sendResponse(res, 400, false, "password is missing");
         }
 
-        if (pin === "") {
+        if (pin === undefined) {
             return sendResponse(res, 400, false, "pin is missing");
         }
 
-        if (country === "") {
+        if (country === undefined) {
             return sendResponse(res, 400, false, "country is missing");
         }
 
-        if (currency === "") {
+        if (currency === undefined) {
             return sendResponse(res, 400, false, "currency is missing");
         }
 
