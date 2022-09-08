@@ -90,12 +90,12 @@ class WalletController {
         const userId = res.user.id;
 
         if (id.trim() !== userId)
-            return sendResponse(
-                res,
-                404,
-                false,
-                "failed to retrieve wallet: user not found."
-            );
+            // return sendResponse(
+            //     res,
+            //     400,
+            //     false,
+            //     "failed to retrieve wallet: user not found."
+            // );
 
         db.query(
             {
@@ -105,6 +105,7 @@ class WalletController {
             },
             async function (error, results) {
                 const ewallet = results[0].ewallet;
+                const issuing_id = results[0].issuing_id;
                 try {
                     let result = await Fetch("GET", "/v1/user/" + ewallet);
                     let message =
@@ -116,6 +117,7 @@ class WalletController {
                     const { country, currency } = results[0];
                     result.body.data.country = country;
                     result.body.data.currency = currency;
+                    result.body.data.issuing_id = issuing_id;
 
                     sendResponse(
                         res,

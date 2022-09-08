@@ -26,4 +26,14 @@ Router.post("/remove", isLoggedIn, (req, res) => {
     Cart.removeFromEcart(res, payload);
 });
 
+Router.post("/transfer", isLoggedIn, (req, res) => {
+    const payload = req.body;
+    Cart.transferCart(res, payload);
+});
+
+Router.post("/refund", isLoggedIn, (req, res) => {
+    const payload = req.body;
+    Cart.refundCart(res, payload);
+});
+
 module.exports = Router;
