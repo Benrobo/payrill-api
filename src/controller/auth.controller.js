@@ -8,6 +8,8 @@ const {
 } = require("../config/rapydEndpoints");
 const Fetch = require("../utils/fetch");
 const db = require("../services/db");
+const { RAPYD_CARD_PROGRAM } = require("../config")
+
 
 class AuthControler {
     #parseUserName(fullname) {
@@ -60,7 +62,24 @@ class AuthControler {
         }
     }
 
+    async #addFund(payload) {
+        try {
+            let result = await Fetch(
+                "POST",
+                "/v1/issuing/bankaccounts/bankaccounttransfertobankaccount",
+                payload
+            );
+            let message = result.statusCode == 200 ? "success" : "failed";
+            let status = result.statusCode == 200 ? true : false;
+            return status;
+        } catch (e) {
+            console.log(e);
+            return false;
+        }
+    }
+
     async login(res, payload) {
+        const self = this;
         if (res === undefined) {
             throw new Error("expected a valid 'res' object but got none ");
         }
@@ -107,6 +126,11 @@ class AuthControler {
                     );
 
                 try {
+
+                    // users payload for adding fund
+                    const { currency, issuing_id } = results[0];
+                    const amount = 0;
+
                     const userPayload = {
                         id: results[0]?.id,
                         username: results[0]?.username,
@@ -121,14 +145,28 @@ class AuthControler {
                     db.query({
                         sql: query,
                         values: [refreshToken, email]
-                    }, (err, result, fields) => {
+                    }, async (err, result, fields) => {
                         if (err)
                             return sendResponse(res, 500, false, "An Error Occured!");
 
+                        // add 0 fund to users ewallet on logging in
+                        const fundPayload = {
+                            currency,
+                            issued_bank_account: issuing_id,
+                            amount
+                        }
+                        const fundAdded = await self.#addFund(fundPayload);
+
+                        if (!fundAdded) {
+                            return sendResponse(res, 500, false, "Something went wrong while logging in.", {
+                                message: "Failed to create initial deposit."
+                            });
+                        }
                         return sendResponse(res, 200, true, "Login Successful", {
                             ...userPayload,
                             accessToken,
                         });
+
                     })
 
                 } catch (e) {
@@ -299,8 +337,7 @@ class AuthControler {
                             payload = {
                                 ewallet_contact: contactId,
                                 country,
-                                card_program:
-                                    "cardprog_21e21afebf22da2d9880ec0a88db4b39",
+                                card_program: RAPYD_CARD_PROGRAM,
                             };
 
                             result = await Fetch(
