@@ -148,7 +148,6 @@ class StoreController {
         const query = isAuthenticated ? `SELECT id,name,subdomain,verified,location,description,logo,cover_photo FROM stores WHERE (user_id = ? AND subdomain = ?)` : `SELECT id,name,subdomain,verified,theme_bg,theme_color,location,description,logo,cover_photo FROM stores WHERE (subdomain = ?)`;
 
         // for authenticated users
-
         if (isAuthenticated) {
             const { id } = res.user;
             db.query({
@@ -171,7 +170,7 @@ class StoreController {
                         404,
                         false,
                         "Not found",
-                        results
+                        {}
                     );
                 }
 
@@ -187,7 +186,6 @@ class StoreController {
         }
 
         // for non-authenticated users
-
         db.query({
             sql: query,
             values: [domain],
@@ -208,7 +206,7 @@ class StoreController {
                     404,
                     false,
                     "Not found",
-                    results
+                    {}
                 );
             }
 
