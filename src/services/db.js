@@ -6,15 +6,17 @@ let user = process.env.DB_USER;
 let password = process.env.DB_PASSWORD;
 let database = process.env.DATABASE;
 
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
     host: host || "localhost",
     user: user || "root",
     password: password || "",
     database: database || "payrill",
+    port: "3307",
+    connectionLimit: 100,
     // port: '/var/run/mysqld/mysqld.sock'  // hack
 });
 
-connection.connect((err) => {
+connection.getConnection((err) => {
     if (err) return console.log(err);
     console.log('DB CONNECTED');
 });
