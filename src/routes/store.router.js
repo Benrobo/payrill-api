@@ -17,4 +17,16 @@ Router.get("/all", isLoggedIn, (req, res) => {
     Store.getAllStores(res);
 });
 
+// Get store by subdomain (auth require)
+Router.get("/byDomain/:subdomain", isLoggedIn, (req, res) => {
+    const {subdomain} = req.params
+    Store.getStoreByDomain(res, true, subdomain);
+});
+
+// Get store by subdomain (auth not required)
+Router.get("/:subdomain", (req, res) => {
+    const {subdomain} = req.params
+    Store.getStoreByDomain(res, false, subdomain);
+});
+
 module.exports = Router;

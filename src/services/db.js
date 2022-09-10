@@ -1,19 +1,24 @@
-require("dotenv").config({ path: "./.env" });
+let mysql = require("mysql");
 
+require("dotenv").config({ path: "./.env" });
 let host = process.env.HOST;
 let user = process.env.DB_USER;
 let password = process.env.DB_PASSWORD;
 let database = process.env.DATABASE;
 
-let mysql = require("mysql");
-const connection = mysql.createConnection({
+const connection = mysql.createPool({
     host: host || "localhost",
     user: user || "root",
-    password: password || "root",
+    password: password || "",
     database: database || "payrill",
-    port: '/var/run/mysqld/mysqld.sock'  // hack
+    port: "3307",
+    connectionLimit: 100,
+    // port: '/var/run/mysqld/mysqld.sock'  // hack
 });
 
-connection.connect();
+connection.getConnection((err) => {
+    if (err) return console.log(err);
+    console.log('DB CONNECTED');
+});
 
 module.exports = connection;

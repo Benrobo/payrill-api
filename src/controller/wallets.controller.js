@@ -189,8 +189,7 @@ class WalletController {
                             receiver = results[0].id;
                             username = results[0].username;
                         }
-                        const title = "Transfer to " + username;
-
+                        const title = "Transfer to " + username
                         createTransaction(
                             transactionId,
                             sender,
@@ -250,7 +249,7 @@ class WalletController {
             const type = payload.data.metadata.type;
             let title = "";
 
-            if(type == "crypto"){
+            if (type == "crypto") {
                 title = payload.data.metadata.crypto;
             }
 

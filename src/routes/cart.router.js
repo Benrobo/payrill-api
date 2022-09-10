@@ -10,7 +10,7 @@ const Cart = new CartControler();
 Router.get("/get/:cartId", isLoggedIn, (req, res) => {
     const payload = req.params.cartId;
     Cart.getEcart(res, payload);
-  });
+});
 
 Router.get("/create", isLoggedIn, (req, res) => {
     Cart.createEcart(res);
