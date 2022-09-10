@@ -32,8 +32,8 @@ Router.post("/addFund", (req, res) => {
 
 // get
 Router.post("/get/:id", isLoggedIn, (req, res) => {
-    const payload = req.params.id;
-    Wallet.getWallet(res, payload);
+    const id = req.params.id;
+    Wallet.getWallet(res, id);
 });
 
 // Id Types
