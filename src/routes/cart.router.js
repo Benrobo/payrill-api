@@ -36,4 +36,9 @@ Router.post("/refund", isLoggedIn, (req, res) => {
     Cart.refundCart(res, payload);
 });
 
+Router.post("/pay", isLoggedIn, (req, res) => {
+    const payload = req.body;
+    Cart.payForCart(res, payload);
+});
+
 module.exports = Router;

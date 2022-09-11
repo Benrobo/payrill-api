@@ -9,11 +9,11 @@ let database = process.env.DATABASE;
 const connection = mysql.createPool({
     host: host || "localhost",
     user: user || "root",
-    password: password || "",
+    password: password || "root",
     database: database || "payrill",
     port: "3307",
     connectionLimit: 100,
-    // port: '/var/run/mysqld/mysqld.sock'  // hack
+    port: '/var/run/mysqld/mysqld.sock'  // hack
 });
 
 connection.getConnection((err) => {
