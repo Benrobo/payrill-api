@@ -193,7 +193,7 @@ class ItemControler {
                     currency,
                     description,
                     image,
-                    Number(itemId),
+                    itemId,
                     id,
                 ],
             },
