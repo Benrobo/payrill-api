@@ -436,14 +436,15 @@ class CartControler {
         );
     }
 
-    async createEcart(res) {
+    async createEcart(res, payload) {
         const { id } = res.user;
+        const { name } = payload;
         const cartId = genId();
         db.query(
             {
-                sql: "INSERT INTO ecart(id,user_id) VALUES(?,?)",
+                sql: "INSERT INTO ecart(id,user_id) VALUES(?,?,?)",
                 timeout: 40000,
-                values: [cartId, id],
+                values: [cartId, id, name],
             },
             function (error, results, fields) {
                 if (error) {
@@ -459,6 +460,7 @@ class CartControler {
                 return sendResponse(res, 200, true, "Ecart Created", {
                     ecart: cartId,
                     userId: id,
+                    name,
                 });
             }
         );
