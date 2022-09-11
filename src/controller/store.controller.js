@@ -25,6 +25,8 @@ class StoreController {
         // Set Defaults if not set
         theme_bg = theme_bg || "#131418";
         theme_color = theme_color || "#FFF";
+        logo = logo || `https://avatars.dicebear.com/api/initials/${name}.svg`
+        cover_photo = cover_photo || `https://avatars.dicebear.com/api/identicon/${name}.svg`
 
         // Check if user already owns a store
         db.query(

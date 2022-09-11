@@ -21,4 +21,13 @@ connection.getConnection((err) => {
     console.log('DB CONNECTED');
 });
 
+
+// function keepAlive() {
+//     connection.getConnection(function (err, connection) {
+//         if (err) { return; }
+//         connection.ping();
+//     });
+// }
+// setInterval(keepAlive, 30000);
+
 module.exports = connection;
