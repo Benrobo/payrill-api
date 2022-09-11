@@ -4,6 +4,26 @@ const Fetch = require("../utils/fetch");
 const db = require("../services/db");
 
 class CartControler {
+    #calculateItems(cartId) {
+        return new Promise((resolve) => {
+            db.query(
+                {
+                    sql: "SELECT * FROM checkout WHERE (ecart_id = ?)",
+                    timeout: 40000,
+                    values: [cartId],
+                },
+                function (error, results) {
+                    const items = results;
+                    let total = 0;
+                    items.forEach(item => {
+                        total += item.item_price;
+                    });
+                    resolve(total);
+                }
+            );
+        });
+    }
+
     async getEcart(res, payload) {
         const { id } = res.user;
         const cartId = payload;
@@ -96,15 +116,273 @@ class CartControler {
         }
     }
 
-    async refundCart(res, payload){
-        
+    async payForCart(res, payload) {
+        const { id } = res.user;
+        const { ecartId, pin } = payload;
+        const self = this;
+
+        db.query(
+            {
+                sql: "SELECT * FROM ecart WHERE (id = ? AND user_id = ?)",
+                timeout: 40000,
+                values: [ecartId, id],
+            },
+            async function (error, results) {
+                if (results.length == 0) {
+                    return sendResponse(
+                        res,
+                        400,
+                        false,
+                        "Access to Cart Denied or Cart Not Found",
+                        {}
+                    );
+                }
+
+                const ecart = results[0];
+                if (ecart.paid === "false" && ecart.confirmed === "false") {
+                    // Init Payment
+                    const storeId = ecart.store_id;
+                    const amount = await self.#calculateItems(ecartId);
+
+                    db.query(
+                        {
+                            sql: "SELECT pin, ewallet, currency FROM users WHERE id = ?",
+                            timeout: 40000,
+                            values: [id],
+                        },
+                        async function (error, results, fields) {
+                            if (toHash(String(pin)) === results[0].pin) {
+                                db.query(
+                                    {
+                                        sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?) GROUP BY ewallet",
+                                        timeout: 40000,
+                                        values: [id, storeId],
+                                    },
+                                    async function (error, results, fields) {
+                                        if (results.length == 0) {
+                                            return sendResponse(
+                                                res,
+                                                400,
+                                                false,
+                                                "An Error Occured",
+                                                {}
+                                            );
+                                        }
+                                        let sender, reciever, currency;
+                                        if (results[1].id == id) {
+                                            sender = results[0].ewallet;
+                                            currency =
+                                                currency || results[0].currency;
+                                            reciever = results[1].ewallet;
+                                        } else {
+                                            sender = results[1].ewallet;
+                                            currency =
+                                                currency || results[1].currency;
+                                            reciever = results[0].ewallet;
+                                        }
+                                        payload["source_ewallet"] = sender;
+                                        payload["destination_ewallet"] =
+                                            reciever;
+                                        payload["currency"] = currency;
+                                        payload["amount"] = amount;
+                                        delete payload["ecartId"];
+
+                                        console.log(payload);
+                                        try {
+                                            let result = await Fetch(
+                                                "POST",
+                                                "/v1/account/transfer",
+                                                payload
+                                            );
+                                            let status =
+                                                result.statusCode == 200
+                                                    ? true
+                                                    : false;
+                                            if (status) {
+                                                db.query(
+                                                    {
+                                                        sql: "UPDATE ecart SET paid = ?, amount = ? WHERE (user_id = ? AND store_id = ? AND id = ?)",
+                                                        timeout: 40000,
+                                                        values: [
+                                                            "true",
+                                                            amount,
+                                                            id,
+                                                            storeId,
+                                                            ecartId,
+                                                        ],
+                                                    },
+                                                    async function (
+                                                        error,
+                                                        results
+                                                    ) {
+                                                        return sendResponse(
+                                                            res,
+                                                            200,
+                                                            true,
+                                                            "Payment Successful",
+                                                            result.body.data
+                                                        );
+                                                    }
+                                                );
+                                            }
+                                        } catch (e) {
+                                            console.log(e);
+                                            return sendResponse(
+                                                res,
+                                                400,
+                                                false,
+                                                "An Error Occured",
+                                                e.body
+                                            );
+                                        }
+                                    }
+                                );
+                            } else {
+                                sendResponse(
+                                    res,
+                                    400,
+                                    false,
+                                    "Incorrect Pin",
+                                    {}
+                                );
+                            }
+                        }
+                    );
+                } else {
+                    return sendResponse(
+                        res,
+                        400,
+                        false,
+                        "Ecart Already Paid For!",
+                        {}
+                    );
+                }
+            }
+        );
+    }
+
+    async refundCart(res, payload) {
+        const { id } = res.user;
+        const { ecartId } = payload;
+
+        db.query(
+            {
+                sql: "SELECT * FROM ecart WHERE (id = ? AND user_id = ?)",
+                timeout: 40000,
+                values: [ecartId, id],
+            },
+            async function (error, results) {
+                if (results.length == 0) {
+                    return sendResponse(
+                        res,
+                        400,
+                        false,
+                        "Access to Cart Denied or Cart Not Found",
+                        {}
+                    );
+                }
+
+                const ecart = results[0];
+                if (ecart.paid === "true" && ecart.confirmed == "false") {
+                    // Init Refund
+                    const storeId = ecart.store_id;
+                    const amount = ecart.amount;
+
+                    db.query(
+                        {
+                            sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?) GROUP BY ewallet",
+                            timeout: 40000,
+                            values: [id, storeId],
+                        },
+                        async function (error, results, fields) {
+                            if (results.length == 0) {
+                                return sendResponse(
+                                    res,
+                                    400,
+                                    false,
+                                    "An Error Occured",
+                                    {}
+                                );
+                            }
+                            let sender, reciever, currency;
+                            if (results[0].id == id) {
+                                sender = results[1].ewallet;
+                                currency = currency || results[1].currency;
+                                reciever = results[0].ewallet;
+                            } else {
+                                sender = results[0].ewallet;
+                                currency = currency || results[0].currency;
+                                reciever = results[1].ewallet;
+                            }
+                            payload["source_ewallet"] = sender;
+                            payload["destination_ewallet"] = reciever;
+                            payload["currency"] = currency;
+                            payload["amount"] = amount;
+                            delete payload["ecartId"];
+
+                            console.log(payload);
+                            try {
+                                let result = await Fetch(
+                                    "POST",
+                                    "/v1/account/transfer",
+                                    payload
+                                );
+                                let status =
+                                    result.statusCode == 200 ? true : false;
+                                if (status) {
+                                    db.query(
+                                        {
+                                            sql: "UPDATE ecart SET paid = ?, amount = ? WHERE (user_id = ? AND store_id = ? AND id = ?)",
+                                            timeout: 40000,
+                                            values: [
+                                                "false",
+                                                0,
+                                                id,
+                                                storeId,
+                                                ecartId,
+                                            ],
+                                        },
+                                        async function (error, results) {
+                                            return sendResponse(
+                                                res,
+                                                200,
+                                                true,
+                                                "Refunded",
+                                                result.body.data
+                                            );
+                                        }
+                                    );
+                                }
+                            } catch (e) {
+                                console.log(e);
+                                return sendResponse(
+                                    res,
+                                    400,
+                                    false,
+                                    "An Error Occured",
+                                    e.body
+                                );
+                            }
+                        }
+                    );
+                } else {
+                    return sendResponse(
+                        res,
+                        400,
+                        false,
+                        "Can Not Refund Ecart",
+                        {}
+                    );
+                }
+            }
+        );
     }
 
     async transferCart(res, payload) {
         const { id } = res.user;
         const { cartId, pin, to } = payload;
 
-        if(pin == undefined){
+        if (pin == undefined) {
             sendResponse(res, 400, false, "Pin required", {});
         }
 
@@ -140,7 +418,13 @@ class CartControler {
                                     values: [to, cartId, id],
                                 },
                                 function (error, results) {
-                                    sendResponse(res, 200, true, "Cart Transfered", {});
+                                    sendResponse(
+                                        res,
+                                        200,
+                                        true,
+                                        "Cart Transfered",
+                                        {}
+                                    );
                                 }
                             );
                         } else {

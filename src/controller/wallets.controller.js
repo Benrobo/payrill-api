@@ -87,17 +87,7 @@ class WalletController {
 
     async getWallet(res, id) {
         // check if users exists first
-        const userId = res.user.id;
-
-        if (id.trim() !== userId) {
-
-        }
-        // return sendResponse(
-        //     res,
-        //     400,
-        //     false,
-        //     "failed to retrieve wallet: user not found."
-        // );
+        const userId = id || res.user.id;
 
         db.query(
             {
