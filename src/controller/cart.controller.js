@@ -442,7 +442,7 @@ class CartControler {
         const cartId = genId();
         db.query(
             {
-                sql: "INSERT INTO ecart(id,user_id) VALUES(?,?,?)",
+                sql: "INSERT INTO ecart(id,user_id,name) VALUES(?,?,?)",
                 timeout: 40000,
                 values: [cartId, id, name],
             },
@@ -451,7 +451,7 @@ class CartControler {
                     console.log(error);
                     return sendResponse(
                         res,
-                        200,
+                        400,
                         true,
                         "Error Creating Ecart",
                         {}
