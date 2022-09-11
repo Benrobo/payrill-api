@@ -146,7 +146,7 @@ class ItemControler {
                 timeout: 40000,
                 values: [
                     itemId,
-                    storeId,
+                    id,
                     name,
                     price,
                     quantity,
