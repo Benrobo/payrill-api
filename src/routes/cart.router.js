@@ -37,7 +37,7 @@ Router.post("/refund", isLoggedIn, (req, res) => {
     Cart.refundCart(res, payload);
 });
 
-Router.post("/pay", isLoggedIn, (req, res) => {
+Router.post("/pay", isLoggedIn, async (req, res) => {
     const payload = req.body;
     Cart.payForCart(res, payload);
 });

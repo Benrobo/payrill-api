@@ -168,8 +168,10 @@ class CartControler {
                                                 {}
                                             );
                                         }
+                                        // console.log(results)
+                                        // return res.json(results)
                                         let sender, reciever, currency;
-                                        if (results[1].id == id) {
+                                        if (results[1]?.id == id) {
                                             sender = results[0].ewallet;
                                             currency =
                                                 currency || results[0].currency;
