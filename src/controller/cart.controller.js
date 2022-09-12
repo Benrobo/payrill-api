@@ -37,7 +37,7 @@ class CartControler {
                 },
                 function (error, results, fields) {
                     let ecarts = results;
-                    const storeId = ecarts[0].store_id;
+                    const storeId = ecarts[0]?.store_id;
 
                     // Get Store Info
                     db.query(
