@@ -16,7 +16,7 @@ class CartControler {
                     const items = results;
                     let total = 0;
                     items.forEach(item => {
-                        total += item.item_price;
+                        total += item.item_price * item.item_quantity;
                     });
                     resolve(total);
                 }
@@ -212,7 +212,7 @@ class CartControler {
                                                         sql: "UPDATE ecart SET paid = ?, amount = ? WHERE (user_id = ? AND store_id = ? AND id = ?)",
                                                         timeout: 40000,
                                                         values: [
-                                                            "true",
+                                                            true,
                                                             amount,
                                                             id,
                                                             storeId,
@@ -224,13 +224,29 @@ class CartControler {
                                                         results
                                                     ) {
                                                         console.log(result.body.data)
-                                                        return sendResponse(
-                                                            res,
-                                                            200,
-                                                            true,
-                                                            "Payment Successful",
-                                                            result.body.data
-                                                        );
+
+                                                        // initiate transaction response to credit reciever ewallet account
+                                                        const transactionResponseBody = {
+                                                            id: result.body.data?.id,
+                                                            metadata: {
+                                                                merchant_defined: "accepted"
+                                                            },
+                                                            status: 'accept'
+                                                        };
+
+                                                        const transactionResult = await Fetch("POST", "/v1/account/transfer/response", transactionResponseBody);
+
+                                                        const tranStatus = transactionResult.statusCode === 200 ? true : false;
+
+                                                        if (tranStatus) {
+                                                            return sendResponse(
+                                                                res,
+                                                                200,
+                                                                true,
+                                                                "Payment Successful",
+                                                                { ...result.body.data, ecartId }
+                                                            );
+                                                        }
                                                     }
                                                 );
                                             }
