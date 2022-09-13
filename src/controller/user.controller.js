@@ -142,9 +142,25 @@ class UserControler {
                                     "/v1/account/transfer",
                                     payload
                                 );
-                                let status =
-                                    result.statusCode == 200 ? true : false;
-                                return sendResponse(res, 200, true, "", result.body.data);
+
+                                // initiate transaction response to credit reciever ewallet account
+                                const transactionResponseBody = {
+                                    id: result.body.data?.id,
+                                    metadata: {
+                                        merchant_defined: "accepted"
+                                    },
+                                    status: 'accept'
+                                };
+
+                                const transactionResult = await Fetch("POST", "/v1/account/transfer/response", transactionResponseBody);
+
+                                const tranStatus = transactionResult.statusCode === 200 ? true : false;
+
+                                if (tranStatus) {
+                                    let status =
+                                        result.statusCode == 200 ? true : false;
+                                    return sendResponse(res, 200, true, "Transfer Successfull.", result.body.data);
+                                }
                             } catch (e) {
                                 console.log(e);
                                 return sendResponse(

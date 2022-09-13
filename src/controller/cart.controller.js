@@ -154,7 +154,7 @@ class CartControler {
                             if (toHash(String(pin)) === results[0].pin) {
                                 db.query(
                                     {
-                                        sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?) GROUP BY ewallet",
+                                        sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?)",
                                         timeout: 40000,
                                         values: [id, storeId],
                                     },
@@ -168,19 +168,25 @@ class CartControler {
                                                 {}
                                             );
                                         }
-                                        // console.log(results)
-                                        // return res.json(results)
+
                                         let sender, reciever, currency;
+
                                         if (results[1]?.id == id) {
-                                            sender = results[0].ewallet;
-                                            currency =
-                                                currency || results[0].currency;
-                                            reciever = results[1].ewallet;
-                                        } else {
                                             sender = results[1].ewallet;
-                                            currency =
-                                                currency || results[1].currency;
+                                            currency = results[1].currency;
                                             reciever = results[0].ewallet;
+                                            // sender = results[0].ewallet;
+                                            // currency =
+                                            //     currency || results[0].currency;
+                                            // reciever = results[1].ewallet;
+                                        } else {
+                                            // sender = results[1].ewallet;
+                                            sender = results[0].ewallet;
+                                            currency = results[0].currency;
+                                            reciever = results[1].ewallet;
+                                            // currency =
+                                            //     currency || results[1].currency;
+                                            // reciever = results[0].ewallet;
                                         }
                                         payload["source_ewallet"] = sender;
                                         payload["destination_ewallet"] =
@@ -189,7 +195,7 @@ class CartControler {
                                         payload["amount"] = amount;
                                         delete payload["ecartId"];
 
-                                        console.log(payload);
+                                        // console.log(payload);
                                         try {
                                             let result = await Fetch(
                                                 "POST",
@@ -217,6 +223,7 @@ class CartControler {
                                                         error,
                                                         results
                                                     ) {
+                                                        console.log(result.body.data)
                                                         return sendResponse(
                                                             res,
                                                             200,

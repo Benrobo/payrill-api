@@ -177,7 +177,7 @@ class WalletController {
                     values: [from, to],
                 },
                 function (error, results) {
-                    console.log(error, results);
+                    // console.log(error, results);
                     if (results.length != 0) {
                         let sender, receiver, username;
                         if (results[0].ewallet == from) {
@@ -202,7 +202,15 @@ class WalletController {
                     }
                 }
             );
-        } else if (
+        }
+        else if (
+            payload.type === "TRANSFER_FUNDS_BETWEEN_EWALLETS_RESPONSE" &&
+            payload.data.status === "NEW"
+        ) {
+            // we cont need any of the data gotten from this webhook here.
+            // just ignore
+        }
+        else if (
             payload.type === "ISSUING_DEPOSIT_COMPLETED" &&
             payload.status === "NEW"
         ) {
