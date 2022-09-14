@@ -214,6 +214,8 @@ class CartControler {
 
                                         let sender, reciever, currency;
 
+                                        // we need to check if actually user is trying to pay for cart from store created by him to prevent transfering of cash to same ewallet which is forbidden by rapyd
+
                                         if (results[1]?.id == id) {
                                             sender = results[1].ewallet;
                                             currency = results[1].currency;
@@ -223,10 +225,10 @@ class CartControler {
                                             //     currency || results[0].currency;
                                             // reciever = results[1].ewallet;
                                         } else {
-                                            // sender = results[1].ewallet;
                                             sender = results[0].ewallet;
                                             currency = results[0].currency;
-                                            reciever = results[1].ewallet;
+                                            reciever = results[1]?.ewallet || results[0]?.ewallet;
+                                            // sender = results[1].ewallet;
                                             // currency =
                                             //     currency || results[1].currency;
                                             // reciever = results[0].ewallet;
@@ -763,13 +765,13 @@ class CartControler {
                                             }
                                         );
                                     } else {
+                                        // product_quantity - ( checkoutItem_qty + newItem_qty )
                                         let checkoutItem = results[0];
                                         let oldQuantity = item.item_quantity;
-                                        let newQuantity =
-                                            checkoutItem.item_quantity +
-                                            oldQuantity -
-                                            Number(quantity);
-                                        if (newQuantity < 0) {
+                                        let newQuantity = oldQuantity - (checkoutItem.item_quantity + parseInt(quantity));
+                                        const newCheckoutItem_qty = (checkoutItem.item_quantity + Number(quantity));
+
+                                        if (newQuantity <= 0) {
                                             return sendResponse(
                                                 res,
                                                 400,
@@ -783,7 +785,7 @@ class CartControler {
                                                 sql: "UPDATE checkout SET item_quantity = ? WHERE (ecart_id = ? AND item_id = ?)",
                                                 timeout: 40000,
                                                 values: [
-                                                    quantity,
+                                                    newCheckoutItem_qty,
                                                     cartId,
                                                     itemId,
                                                 ],

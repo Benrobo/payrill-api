@@ -37,7 +37,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // router  middlewares
-app.use(customlimiter);
+// app.use(customlimiter);
 
 app.get("/", (req, res) => {
     res.send(`WELCOME`);
