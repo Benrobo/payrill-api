@@ -12,7 +12,7 @@ const connection = mysql.createPool({
     password: password || "",
     database: database || "payrill",
     port: "3307",
-    connectionLimit: 100,
+    connectionLimit: 1000,
     // port: '/var/run/mysqld/mysqld.sock'  // hack
 });
 

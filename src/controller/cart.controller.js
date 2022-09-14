@@ -24,6 +24,47 @@ class CartControler {
         });
     }
 
+    async getEcartForOrg(res, ecartId) {
+        try {
+            db.query(
+                {
+                    sql: "SELECT * FROM checkout WHERE (ecart_id = ?)",
+                    timeout: 40000,
+                    values: [ecartId],
+                },
+                function (error, results, fields) {
+                    if (error) {
+                        return sendResponse(
+                            res,
+                            400,
+                            false,
+                            "Something went wrong fetching items.",
+                            {}
+                        );
+                    }
+
+                    return sendResponse(
+                        res,
+                        200,
+                        true,
+                        "Fetched All Ecart",
+                        results
+                    );
+
+                }
+            );
+        } catch (e) {
+            console.log(e)
+            return sendResponse(
+                res,
+                500,
+                false,
+                "Something went wrong fetching items.",
+                {}
+            );
+        }
+    }
+
     async getEcart(res, payload) {
         const { id } = res.user;
         const cartId = payload;
@@ -61,7 +102,9 @@ class CartControler {
                     );
                 }
             );
-        } else {
+        }
+
+        else {
             db.query(
                 {
                     sql: "SELECT * FROM ecart WHERE (id = ? AND user_id = ?)",

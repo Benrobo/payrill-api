@@ -12,6 +12,12 @@ Router.get("/get/:cartId", isLoggedIn, (req, res) => {
     Cart.getEcart(res, payload);
 });
 
+// Get ecart items 
+Router.get("/get/org/:cartId", isLoggedIn, (req, res) => {
+    const payload = req.params.cartId;
+    Cart.getEcartForOrg(res, payload);
+});
+
 Router.post("/create", isLoggedIn, (req, res) => {
     const payload = req.body;
     Cart.createEcart(res, payload);
