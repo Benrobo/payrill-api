@@ -70,7 +70,7 @@ class UserControler {
                             newPayload
                         );
                         let status = result.statusCode == 200 ? true : false;
-                        sendResponse(res, 200, true, result.body);
+                        sendResponse(res, 200, true, status ? "Purchase Successfull" : "Something went wrong");
                     } catch (e) {
                         let message = "An Error Occurred";
                         if (e.body.status.error_code == "NOT_ENOUGH_FUNDS") {
