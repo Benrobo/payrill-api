@@ -29,7 +29,7 @@ class UserControler {
         const { id } = res.user;
         db.query(
             {
-                sql: "SELECT id,name,username FROM users WHERE (id != ?)",
+                sql: "SELECT id,name,username FROM users",
                 timeout: 40000,
                 values: [id],
             },
