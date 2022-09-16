@@ -766,10 +766,10 @@ class CartControler {
                                         );
                                     } else {
                                         // product_quantity - ( checkoutItem_qty + newItem_qty )
-                                        let checkoutItem = results[0];
+                                        // let checkoutItem = results[0];
                                         let oldQuantity = item.item_quantity;
-                                        let newQuantity = oldQuantity - (checkoutItem.item_quantity + parseInt(quantity));
-                                        const newCheckoutItem_qty = (checkoutItem.item_quantity + Number(quantity));
+                                        let newQuantity = quantity > 1 ? oldQuantity - parseInt(quantity) : oldQuantity;
+                                        const newCheckoutItem_qty = parseInt(quantity);
 
                                         if (newQuantity <= 0) {
                                             return sendResponse(
