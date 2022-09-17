@@ -16,7 +16,7 @@ class CartControler {
                     const items = results;
                     let total = 0;
                     items.forEach(item => {
-                        total += item.item_price;
+                        total += (item.item_price * item.item_quantity);
                     });
                     resolve(total);
                 }
@@ -442,7 +442,7 @@ class CartControler {
         const cartId = genId();
         db.query(
             {
-                sql: "INSERT INTO ecart(id,user_id) VALUES(?,?,?)",
+                sql: "INSERT INTO ecart(id,user_id, name) VALUES(?,?,?)",
                 timeout: 40000,
                 values: [cartId, id, name],
             },

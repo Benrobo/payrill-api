@@ -11,6 +11,7 @@ const { customlimiter } = require("./middlewares/rateLimiting");
 const authRouter = require("./routes/auth.router");
 const cardRouter = require("./routes/card.router");
 const cartRouter = require("./routes/cart.router");
+const ecartRouter = require("./routes/ecart.router");
 const itemRouter = require("./routes/item.router");
 const userRouter = require("./routes/user.router");
 const walletRouter = require("./routes/wallets.router");
@@ -37,7 +38,7 @@ app.use(bodyParser.urlencoded({ extended: false }));
 app.use(cookieParser());
 
 // router  middlewares
-app.use(customlimiter);
+// app.use(customlimiter);
 
 app.get("/", (req, res) => {
     res.send(`WELCOME`);
@@ -65,6 +66,10 @@ app.use("/api/card", cardRouter);
 
 // Cart
 app.use("/api/cart", cartRouter);
+
+// Cart
+app.use("/api/ecart", ecartRouter);
+
 
 // Item
 app.use("/api/item", itemRouter);

@@ -11,8 +11,9 @@ Router.get("/get/:cartId", (req, res) => {
     Ecart.getEcart(res, payload);
 });
 
-Router.get("/create", (req, res) => {
-    Ecart.createEcart(res);
+Router.post("/create", (req, res) => {
+    const payload = req.body;
+    Ecart.createEcart(res, payload);
 });
 
 Router.post("/add", (req, res) => {
@@ -27,7 +28,13 @@ Router.post("/remove", (req, res) => {
 
 Router.post("/transfer", (req, res) => {
     const payload = req.body;
-    Ecart.transferCart(res, payload);
+    Ecart.transferEcart(res, payload);
+});
+
+Router.post("/pay/:cartId", (req, res) => {
+    const payload = req.body;
+    const cartId = req.params.cartId;
+    Ecart.payForEcart(res, payload, cartId);
 });
 
 module.exports = Router;

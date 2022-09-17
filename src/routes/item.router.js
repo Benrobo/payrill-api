@@ -13,7 +13,7 @@ Router.get("/get/:itemId", isLoggedIn, (req, res) => {
 });
 
 // Get all Items
-Router.post("/get/all", isLoggedIn, (req, res) => {
+Router.post("/get/all", (req, res) => {
     const payload = req.body;
     Item.getAllItems(res, payload);
 });

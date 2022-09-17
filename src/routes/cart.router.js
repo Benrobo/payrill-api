@@ -12,8 +12,9 @@ Router.get("/get/:cartId", isLoggedIn, (req, res) => {
     Cart.getEcart(res, payload);
 });
 
-Router.get("/create", isLoggedIn, (req, res) => {
-    Cart.createEcart(res);
+Router.post("/create", isLoggedIn, (req, res) => {
+    const payload = req.body;
+    Cart.createEcart(res, payload);
 });
 
 Router.post("/add", isLoggedIn, (req, res) => {
