@@ -16,12 +16,57 @@ class CartControler {
                     const items = results;
                     let total = 0;
                     items.forEach(item => {
+<<<<<<< HEAD
                         total += (item.item_price * item.item_quantity);
+=======
+                        total += item.item_price * item.item_quantity;
+>>>>>>> 40436b1bab4829cdd42fb2fe46fc2a7363f9573c
                     });
                     resolve(total);
                 }
             );
         });
+    }
+
+    async getEcartForOrg(res, ecartId) {
+        try {
+            db.query(
+                {
+                    sql: "SELECT * FROM checkout WHERE (ecart_id = ?)",
+                    timeout: 40000,
+                    values: [ecartId],
+                },
+                function (error, results, fields) {
+                    if (error) {
+                        return sendResponse(
+                            res,
+                            400,
+                            false,
+                            "Something went wrong fetching items.",
+                            {}
+                        );
+                    }
+
+                    return sendResponse(
+                        res,
+                        200,
+                        true,
+                        "Fetched All Ecart",
+                        results
+                    );
+
+                }
+            );
+        } catch (e) {
+            console.log(e)
+            return sendResponse(
+                res,
+                500,
+                false,
+                "Something went wrong fetching items.",
+                {}
+            );
+        }
     }
 
     async getEcart(res, payload) {
@@ -37,7 +82,7 @@ class CartControler {
                 },
                 function (error, results, fields) {
                     let ecarts = results;
-                    const storeId = ecarts[0].store_id;
+                    const storeId = ecarts[0]?.store_id;
 
                     // Get Store Info
                     db.query(
@@ -61,7 +106,9 @@ class CartControler {
                     );
                 }
             );
-        } else {
+        }
+
+        else {
             db.query(
                 {
                     sql: "SELECT * FROM ecart WHERE (id = ? AND user_id = ?)",
@@ -154,7 +201,7 @@ class CartControler {
                             if (toHash(String(pin)) === results[0].pin) {
                                 db.query(
                                     {
-                                        sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?) GROUP BY ewallet",
+                                        sql: "SELECT id,ewallet,currency FROM users WHERE id in (?,?)",
                                         timeout: 40000,
                                         values: [id, storeId],
                                     },
@@ -168,17 +215,27 @@ class CartControler {
                                                 {}
                                             );
                                         }
+
                                         let sender, reciever, currency;
-                                        if (results[1].id == id) {
-                                            sender = results[0].ewallet;
-                                            currency =
-                                                currency || results[0].currency;
-                                            reciever = results[1].ewallet;
-                                        } else {
+
+                                        // we need to check if actually user is trying to pay for cart from store created by him to prevent transfering of cash to same ewallet which is forbidden by rapyd
+
+                                        if (results[1]?.id == id) {
                                             sender = results[1].ewallet;
-                                            currency =
-                                                currency || results[1].currency;
+                                            currency = results[1].currency;
                                             reciever = results[0].ewallet;
+                                            // sender = results[0].ewallet;
+                                            // currency =
+                                            //     currency || results[0].currency;
+                                            // reciever = results[1].ewallet;
+                                        } else {
+                                            sender = results[0].ewallet;
+                                            currency = results[0].currency;
+                                            reciever = results[1]?.ewallet || results[0]?.ewallet;
+                                            // sender = results[1].ewallet;
+                                            // currency =
+                                            //     currency || results[1].currency;
+                                            // reciever = results[0].ewallet;
                                         }
                                         payload["source_ewallet"] = sender;
                                         payload["destination_ewallet"] =
@@ -187,7 +244,7 @@ class CartControler {
                                         payload["amount"] = amount;
                                         delete payload["ecartId"];
 
-                                        console.log(payload);
+                                        // console.log(payload);
                                         try {
                                             let result = await Fetch(
                                                 "POST",
@@ -204,7 +261,7 @@ class CartControler {
                                                         sql: "UPDATE ecart SET paid = ?, amount = ? WHERE (user_id = ? AND store_id = ? AND id = ?)",
                                                         timeout: 40000,
                                                         values: [
-                                                            "true",
+                                                            true,
                                                             amount,
                                                             id,
                                                             storeId,
@@ -215,13 +272,30 @@ class CartControler {
                                                         error,
                                                         results
                                                     ) {
-                                                        return sendResponse(
-                                                            res,
-                                                            200,
-                                                            true,
-                                                            "Payment Successful",
-                                                            result.body.data
-                                                        );
+                                                        console.log(result.body.data)
+
+                                                        // initiate transaction response to credit reciever ewallet account
+                                                        const transactionResponseBody = {
+                                                            id: result.body.data?.id,
+                                                            metadata: {
+                                                                merchant_defined: "accepted"
+                                                            },
+                                                            status: 'accept'
+                                                        };
+
+                                                        const transactionResult = await Fetch("POST", "/v1/account/transfer/response", transactionResponseBody);
+
+                                                        const tranStatus = transactionResult.statusCode === 200 ? true : false;
+
+                                                        if (tranStatus) {
+                                                            return sendResponse(
+                                                                res,
+                                                                200,
+                                                                true,
+                                                                "Payment Successful",
+                                                                { ...result.body.data, ecartId }
+                                                            );
+                                                        }
                                                     }
                                                 );
                                             }
@@ -442,7 +516,11 @@ class CartControler {
         const cartId = genId();
         db.query(
             {
+<<<<<<< HEAD
                 sql: "INSERT INTO ecart(id,user_id, name) VALUES(?,?,?)",
+=======
+                sql: "INSERT INTO ecart(id,user_id,name) VALUES(?,?,?)",
+>>>>>>> 40436b1bab4829cdd42fb2fe46fc2a7363f9573c
                 timeout: 40000,
                 values: [cartId, id, name],
             },
@@ -451,7 +529,7 @@ class CartControler {
                     console.log(error);
                     return sendResponse(
                         res,
-                        200,
+                        400,
                         true,
                         "Error Creating Ecart",
                         {}
@@ -695,13 +773,13 @@ class CartControler {
                                             }
                                         );
                                     } else {
-                                        let checkoutItem = results[0];
+                                        // product_quantity - ( checkoutItem_qty + newItem_qty )
+                                        // let checkoutItem = results[0];
                                         let oldQuantity = item.item_quantity;
-                                        let newQuantity =
-                                            checkoutItem.item_quantity +
-                                            oldQuantity -
-                                            Number(quantity);
-                                        if (newQuantity < 0) {
+                                        let newQuantity = quantity > 1 ? oldQuantity - parseInt(quantity) : oldQuantity;
+                                        const newCheckoutItem_qty = parseInt(quantity);
+
+                                        if (newQuantity <= 0) {
                                             return sendResponse(
                                                 res,
                                                 400,
@@ -715,7 +793,7 @@ class CartControler {
                                                 sql: "UPDATE checkout SET item_quantity = ? WHERE (ecart_id = ? AND item_id = ?)",
                                                 timeout: 40000,
                                                 values: [
-                                                    quantity,
+                                                    newCheckoutItem_qty,
                                                     cartId,
                                                     itemId,
                                                 ],
