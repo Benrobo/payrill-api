@@ -16,11 +16,7 @@ class CartControler {
                     const items = results;
                     let total = 0;
                     items.forEach(item => {
-<<<<<<< HEAD
-                        total += (item.item_price * item.item_quantity);
-=======
                         total += item.item_price * item.item_quantity;
->>>>>>> 40436b1bab4829cdd42fb2fe46fc2a7363f9573c
                     });
                     resolve(total);
                 }
@@ -516,11 +512,7 @@ class CartControler {
         const cartId = genId();
         db.query(
             {
-<<<<<<< HEAD
                 sql: "INSERT INTO ecart(id,user_id, name) VALUES(?,?,?)",
-=======
-                sql: "INSERT INTO ecart(id,user_id,name) VALUES(?,?,?)",
->>>>>>> 40436b1bab4829cdd42fb2fe46fc2a7363f9573c
                 timeout: 40000,
                 values: [cartId, id, name],
             },
