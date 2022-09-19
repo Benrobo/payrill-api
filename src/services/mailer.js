@@ -18,8 +18,8 @@ let transporter = mailer.createTransport({
     },
 });
 
-const COMPANY = "RayPal";
-const URL = "https://raypal.finance";
+const COMPANY = "PayRill";
+const URL = "https://payrill.app";
 const LOGO = "https://raypal.finance/favicon.ico";
 
 function makeTemplate(name, email, title, message) {
@@ -37,7 +37,7 @@ function makeTemplate(name, email, title, message) {
 async function sendMail(name, email, title, message) {
     // send mail with defined transport object
     let info = await transporter.sendMail({
-        from: '"RayPal " <info@raypal.finance>', // sender address
+        from: '"PayRill " <info@payrill.app>', // sender address
         to: email, // list of receivers
         subject: title, // Subject line
         html: makeTemplate(name, email, title, message), // html body

@@ -16,8 +16,20 @@ const { convertCurrency } = require("../services");
 const { createTransaction } = require("../services/transaction");
 const { sendMail } = require("../services/mailer");
 const db = require("../services/db");
+const query = require("../helpers/query");
 
 class WalletController {
+    #currencyToSymbol(currency) {
+        let all = {
+            "USD": "$",
+            "CAD": "$",
+            "GBP": "£",
+            "JPY": "¥",
+            "EUR": "€"
+        }
+        return all[currency] || (currencyToSymbol(currency));
+    }
+
     async addFund(res, payload) {
         try {
             let result = await Fetch(
@@ -158,7 +170,8 @@ class WalletController {
     async webhook(res, payload) {
         console.log(payload);
 
-        // Identity Verification
+        const currencyToSymbol = this.#currencyToSymbol;
+
         if (
             payload.type === "TRANSFER_FUNDS_BETWEEN_EWALLETS_CREATED" &&
             payload.status === "NEW"
@@ -168,7 +181,11 @@ class WalletController {
             const from = payload.data.source_ewallet_id;
             const to = payload.data.destination_ewallet_id;
             const currency = payload.data.currency;
-            const type = "transfer";
+            if(!payload.data.metadata){
+                payload.data.metadata = {};
+                payload.data.metadata.type = "transfer";
+            }
+            const type = payload.data.metadata.type;
 
             db.query(
                 {
@@ -176,7 +193,7 @@ class WalletController {
                     timeout: 40000,
                     values: [from, to],
                 },
-                function (error, results) {
+                async function (error, results) {
                     console.log(error, results);
                     if (results.length != 0) {
                         let sender, receiver, username;
@@ -189,16 +206,91 @@ class WalletController {
                             receiver = results[0].id;
                             username = results[0].username;
                         }
-                        const title = "Transfer to " + username
-                        createTransaction(
-                            transactionId,
-                            sender,
-                            receiver,
-                            amount,
-                            currency,
-                            type,
-                            title
-                        );
+                        if(type == "transfer"){
+                            const title = "Transfer to " + username;
+                            createTransaction(
+                                transactionId,
+                                sender,
+                                receiver,
+                                amount,
+                                currency,
+                                type,
+                                title
+                            );
+
+                            let you = await query(
+                                "SELECT * FROM users WHERE id = ?",
+                                [receiver]
+                            );
+                            let me = await query(
+                                "SELECT * FROM users WHERE id = ?",
+                                [sender]
+                            );
+
+                            you = you[0];
+                            me = me[0];
+
+                            // Send Mail
+                            sendMail(
+                                you.name,
+                                you.email,
+                                "Transfer Received",
+                                `You just received <b>${
+                                    currencyToSymbol(currency) + amount
+                                }</b> from <b>${me.name}</b>`
+                            );
+
+                            sendMail(
+                                me.name,
+                                me.email,
+                                "Transfer Sent",
+                                `You just sent <b>${
+                                    currencyToSymbol(currency) + amount
+                                }</b> to <b>${you.name}</b>`
+                            );
+                        }else if(type == "refund"){
+                            const title = "Refund to " + username;
+                            createTransaction(
+                                transactionId,
+                                sender,
+                                receiver,
+                                amount,
+                                currency,
+                                type,
+                                title
+                            );
+
+                            let you = await query(
+                                "SELECT * FROM users WHERE id = ?",
+                                [receiver]
+                            );
+                            let me = await query(
+                                "SELECT * FROM users WHERE id = ?",
+                                [sender]
+                            );
+
+                            you = you[0];
+                            me = me[0];
+
+                            // Send Mail
+                            sendMail(
+                                you.name,
+                                you.email,
+                                "Refund Received",
+                                `You just received <b>${
+                                    currencyToSymbol(currency) + amount
+                                }</b> from <b>${me.name}</b>`
+                            );
+
+                            sendMail(
+                                me.name,
+                                me.email,
+                                "Refund Sent",
+                                `You just sent <b>${
+                                    currencyToSymbol(currency) + amount
+                                }</b> to <b>${you.name}</b>`
+                            );
+                        }
                     }
                 }
             );
@@ -215,9 +307,13 @@ class WalletController {
             const type = "deposit";
             const title = "Deposit From " + beneficiary;
 
+            if (amount == 0) {
+                return;
+            }
+
             db.query(
                 {
-                    sql: "SELECT id FROM users WHERE (ewallet = ?)",
+                    sql: "SELECT * FROM users WHERE (ewallet = ?)",
                     timeout: 40000,
                     values: [ewallet],
                 },
@@ -225,6 +321,7 @@ class WalletController {
                     if (results.length != 0) {
                         let receiver = results[0].id;
                         let sender = "";
+                        let me = results[0];
 
                         createTransaction(
                             transactionId,
@@ -234,6 +331,15 @@ class WalletController {
                             currency,
                             type,
                             title
+                        );
+
+                        sendMail(
+                            me.name,
+                            me.email,
+                            "Deposit Received",
+                            `You just deposited <b>${
+                                currencyToSymbol(currency) + amount
+                            }</b> to your account from <b>${beneficiary}</b>`
                         );
                     }
                 }
@@ -247,35 +353,114 @@ class WalletController {
             const ewallet = payload.data.id;
             const currency = payload.data.last_transaction_currency;
             const type = payload.data.metadata.type;
-            let title = "";
+            let wallet = "";
+            let crypto = "";
+            let address = "";
 
             if (type == "crypto") {
-                title = payload.data.metadata.crypto;
+                crypto = payload.data.metadata.crypto;
+                wallet = payload.data.metadata.wallet;
+            } else if (type == "hotel-booking") {
+                address = payload.data.metadata.address;
             }
 
             db.query(
                 {
-                    sql: "SELECT id FROM users WHERE (ewallet = ?)",
+                    sql: "SELECT * FROM users WHERE (ewallet = ?)",
                     timeout: 40000,
                     values: [ewallet],
                 },
                 function (error, results) {
                     if (results.length != 0) {
                         let receiver = results[0].id;
+                        let me = results[0];
                         let sender = "";
 
-                        createTransaction(
-                            transactionId,
-                            sender,
-                            receiver,
-                            amount,
-                            currency,
-                            type,
-                            title
-                        );
+                        if (type == "crypto") {
+                            createTransaction(
+                                transactionId,
+                                sender,
+                                receiver,
+                                amount,
+                                currency,
+                                type,
+                                "Purchased " + crypto
+                            );
+
+                            sendMail(
+                                me.name,
+                                me.email,
+                                "Crypto Purchase",
+                                `You just purchased <b>${
+                                    currencyToSymbol(currency) + amount
+                                }</b> worth of <b>${crypto}</b> to the wallet <b>${wallet}</b>`
+                            );
+                        } else if (type == "hotel-booking") {
+                            createTransaction(
+                                transactionId,
+                                sender,
+                                receiver,
+                                amount,
+                                currency,
+                                type,
+                                "Booked a hotel"
+                            );
+
+                            sendMail(
+                                me.name,
+                                me.email,
+                                "Hotel Booked",
+                                `You just booked a hotel for <b>${
+                                    currencyToSymbol(currency) + amount
+                                }</b> at <b>${address}</b>`
+                            );
+                        }
                     }
                 }
             );
+        } else if (
+            payload.type === "PAYMENT_COMPLETED" &&
+            payload.status === "NEW"
+        ) {
+            const transactionId = payload.id;
+            const amount = payload.data.amount;
+            const ewallet = payload.data.ewallet_id;
+            const currency = payload.data.currency_code;
+            const ending = payload.data.payment_method_data.last4;
+            const sender = payload.data.payment_method_data.name;
+            const type = payload.data.metadata.type;
+
+            if(type == "cart_payment"){
+                try {
+                    const result = await query("SELECT * FROM users WHERE ewallet = ?", [ewallet]);
+                    if(result.length != 0){
+                        let me = result[0];
+
+                        // Create Transaction
+                        createTransaction(
+                            transactionId,
+                            sender,
+                            me.id,
+                            amount,
+                            currency,
+                            "card_in",
+                            "Payment from Card ending with " + ending
+                        );
+
+                        // Send Mail
+                        sendMail(
+                            me.name,
+                            me.email,
+                            "Card Payment",
+                            `You just received <b>${
+                                currencyToSymbol(currency) + amount
+                            }</b> from card ending with <b>${ending}</b>`
+                        );
+                    }
+                } catch (error) {
+                    
+                }
+            }
         }
 
         sendResponse(res, 200, true, "Webhook Endpoint", {});

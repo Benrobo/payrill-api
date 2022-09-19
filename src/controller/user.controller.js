@@ -41,7 +41,7 @@ class UserControler {
 
     async pay(res, payload) {
         const { id } = res.user;
-        let { type, amount, pin, currency, crypto } = payload;
+        let { type, amount, pin, currency } = payload;
 
         db.query(
             {
@@ -60,8 +60,11 @@ class UserControler {
                         metadata: {},
                     };
                     newPayload.metadata.type = type;
-                    if (crypto) {
-                        newPayload.metadata.crypto = crypto;
+                    if (type == "crypto") {
+                        newPayload.metadata.crypto = payload.crypto || "";
+                        newPayload.metadata.wallet = payload.cryptoAddress || "";
+                    }else if(type == "hotel-booking"){
+                        newPayload.metadata.address = payload.address || "";
                     }
                     try {
                         let result = await Fetch(
@@ -135,6 +138,8 @@ class UserControler {
                             payload["source_ewallet"] = sender;
                             payload["destination_ewallet"] = reciever;
                             payload["currency"] = currency;
+                            payload.metadata = {};
+                            payload.metadata.type = "transfer";
                             console.log(payload);
                             try {
                                 let result = await Fetch(
@@ -144,7 +149,28 @@ class UserControler {
                                 );
                                 let status =
                                     result.statusCode == 200 ? true : false;
-                                return sendResponse(res, 200, true, "", result.body.data);
+                                if(status){
+                                    // initiate transaction response to credit reciever ewallet account
+                                        const transactionResponseBody = {
+                                            id: result.body.data?.id,
+                                            metadata: {
+                                                merchant_defined: "accepted",
+                                                type: "transfer"
+                                            },
+                                            status: 'accept'
+                                        };
+
+                                        const transactionResult = await Fetch("POST", "/v1/account/transfer/response", transactionResponseBody);
+
+                                        const tranStatus = transactionResult.statusCode === 200 ? true : false;
+
+                                        if(tranStatus){
+                                            return sendResponse(res, 200, true, "Transfer Successful", result.body.data);
+                                        }
+                                        throw("");
+                                }else{
+                                    throw("")
+                                }
                             } catch (e) {
                                 console.log(e);
                                 return sendResponse(

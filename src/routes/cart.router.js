@@ -18,6 +18,11 @@ Router.get("/get/org/:cartId", isLoggedIn, (req, res) => {
     Cart.getEcartForOrg(res, payload);
 });
 
+Router.get("/import/:cartId", isLoggedIn, (req, res) => {
+    const cartId = req.params.cartId;
+    Cart.importCart(res, cartId);
+});
+
 Router.post("/create", isLoggedIn, (req, res) => {
     const payload = req.body;
     Cart.createEcart(res, payload);
@@ -46,6 +51,11 @@ Router.post("/refund", isLoggedIn, (req, res) => {
 Router.post("/pay", isLoggedIn, async (req, res) => {
     const payload = req.body;
     Cart.payForCart(res, payload);
+});
+
+Router.post("/approve", isLoggedIn, async (req, res) => {
+    const payload = req.body;
+    Cart.approveCart(res, payload);
 });
 
 module.exports = Router;

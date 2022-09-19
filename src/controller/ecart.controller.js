@@ -1,6 +1,6 @@
 const sendResponse = require("../helpers/response");
 const Fetch = require("../utils/fetch");
-const {genId} = require("../helpers");
+const {genUnique} = require("../helpers");
 const db = require("../services/db");
 const query = require("../helpers/query");
 
@@ -16,8 +16,7 @@ class EcartControler {
                 let total = 0;
                 items.forEach(item=>{
                     total += (item.item_price * item.item_quantity);
-                }
-                );
+                });
                 resolve(total);
             });
         }
@@ -105,7 +104,6 @@ class EcartControler {
             if (ecart.user_id != "ecart") {
                 return sendResponse(res, 400, false, "Ecart Not Found or Access to Ecart denied", {});
             }
-
             console.log(ecart);
 
             // Set Amount
@@ -113,16 +111,21 @@ class EcartControler {
             let seller = await query("SELECT * FROM users WHERE id = ?", [ecart.store_id]);
             if (seller.length != 0) {
                 seller = seller[0];
+                // Set Currency
+                payload.currency = seller.currency;
                 payload.ewallets = [{
-                    ewallet: ecart.ewallet,
+                    ewallet: seller.ewallet,
                     percentage: 100
                 }];
+                payload.metadata = {};
+                payload.metadata.type = "cart_payment";
                 console.log(seller, payload);
 
                 try {
                     let result = await Fetch("POST", "/v1/payments", payload);
                     let message = result.statusCode == 200 ? "success" : "failed";
                     let status = result.statusCode == 200 ? true : false;
+                    query("UPDATE ecart SET paid = ?, amount = ? WHERE id = ?", ["true",payload.amount,cartId])
                     sendResponse(res, 200, true, "Paid", result);
                 } catch (error) {
                     sendResponse(res, 400, false, "An Error Occurred", error)
@@ -172,7 +175,7 @@ class EcartControler {
 
     async createEcart(res, payload) {
         const {name} = payload;
-        const cartId = genId();
+        const cartId = genUnique();
         const id = "ecart";
         db.query({
             sql: "INSERT INTO ecart(id,user_id, name) VALUES(?,?,?)",
