@@ -269,7 +269,7 @@ class EcartControler {
             values: [cartId],
         }, function(error, results, fields) {
             if (results.length == 0) {
-                return sendResponse(res, 400, false, "ECart Not Found", {});
+                return sendResponse(res, 400, false, "Ecart Not Found", {});
             }
             const ecart = results[0];
             let storeId = ecart.store_id;

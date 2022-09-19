@@ -1,5 +1,5 @@
 const sendResponse = require("../helpers/response");
-const {genId, toHash} = require("../helpers");
+const {genId, toHash, genUnique} = require("../helpers");
 const Fetch = require("../utils/fetch");
 const db = require("../services/db");
 const query = require("../helpers/query");
@@ -27,11 +27,11 @@ class CartControler {
     async importCart(res, cartId){
         const { id } = res.user;
         try {
-            const result = await query("SELECT * FROM ecarts WHERE (id = ? AND user_id = ?)",[cartId,"ecart"]);
+            const result = await query("SELECT * FROM ecart WHERE (id = ? AND user_id = ?)",[cartId,"ecart"]);
             if(result.length != 0){
                 const ecart = result[0];
                 try {
-                    await query("UPDATE ecarts SET user_id = ? WHERE (id = ? AND user_id = ?)",[id,cartId,"ecart"]);
+                    await query("UPDATE ecart SET user_id = ? WHERE (id = ? AND user_id = ?)",[id,cartId,"ecart"]);
                     sendResponse(res, 200, true, "Ecart Imported", {});
                 } catch (err) {
                     sendResponse(res, 400, false, "An Error Occurred", err);
@@ -90,13 +90,21 @@ class CartControler {
                 sql: "SELECT * FROM checkout WHERE (ecart_id = ?)",
                 timeout: 40000,
                 values: [ecartId],
-            }, function(error, results, fields) {
+            }, async function(error, results) {
                 if (error) {
-                    return sendResponse(res, 400, false, "Something went wrong fetching items.", {});
+                    return sendResponse(res, 400, false, "Something went wrong fetching items.", error);
                 }
-
-                return sendResponse(res, 200, true, "Fetched All Ecart", results);
-
+                let ecart = {};
+                try{
+                    let result = await query("SELECT * FROM ecart WHERE id = ?",[ecartId]);
+                    if(result.length != 0){
+                        ecart = result[0];
+                    }
+                    ecart.items = results;
+                    sendResponse(res, 200, true, "Fetched All Ecart", ecart);
+                }catch(e){
+                    sendResponse(res, 400, false, "An Error Occurred", e);
+                }
             });
         } catch (e) {
             console.log(e)
@@ -170,6 +178,7 @@ class CartControler {
     async payForCart(res, payload) {
         const {id} = res.user;
         const {ecartId, pin} = payload;
+        let currency = payload.currency;
         const self = this;
 
         db.query({
@@ -202,13 +211,13 @@ class CartControler {
                                 return sendResponse(res, 400, false, "An Error Occured", {});
                             }
 
-                            let sender, reciever, currency;
+                            let sender, reciever;
 
                             // we need to check if actually user is trying to pay for cart from store created by him to prevent transfering of cash to same ewallet which is forbidden by rapyd
 
                             if (results[1]?.id == id) {
                                 sender = results[1].ewallet;
-                                currency = results[1].currency;
+                                currency = currency || results[1].currency;
                                 reciever = results[0].ewallet;
                                 // sender = results[0].ewallet;
                                 // currency =
@@ -216,7 +225,7 @@ class CartControler {
                                 // reciever = results[1].ewallet;
                             } else {
                                 sender = results[0].ewallet;
-                                currency = results[0].currency;
+                                currency = currency || results[0].currency;
                                 reciever = results[1]?.ewallet || results[0]?.ewallet;
                                 // sender = results[1].ewallet;
                                 // currency =
@@ -237,7 +246,7 @@ class CartControler {
                                     db.query({
                                         sql: "UPDATE ecart SET paid = ?, amount = ? WHERE (user_id = ? AND store_id = ? AND id = ?)",
                                         timeout: 40000,
-                                        values: [true, amount, id, storeId, ecartId, ],
+                                        values: ["true", amount, id, storeId, ecartId, ],
                                     }, async function(error, results) {
                                         console.log(result.body.data)
 
@@ -400,7 +409,7 @@ class CartControler {
     async createEcart(res, payload) {
         const {id} = res.user;
         const {name} = payload;
-        const cartId = genId();
+        const cartId = genUnique();
         db.query({
             sql: "INSERT INTO ecart(id,user_id, name) VALUES(?,?,?)",
             timeout: 40000,

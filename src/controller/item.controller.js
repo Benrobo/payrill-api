@@ -88,10 +88,6 @@ class ItemControler {
         const {name, price, quantity, currency, description, image, storeId} = payload;
         const itemId = genId();
 
-        if (type === "user1") {
-            return sendResponse(res, 400, false, "Access Denied", {});
-        }
-
         db.query({
             sql: "INSERT INTO store_items(id,store_id,item_name,item_price,item_quantity,item_currency,item_description,item_image) VALUES(?,?,?,?,?,?,?,?)",
             timeout: 40000,
@@ -99,7 +95,7 @@ class ItemControler {
         }, function(error, results, fields) {
             if (error) {
                 console.log(error);
-                return sendResponse(res, 400, false, "Error Adding Item", {});
+                return sendResponse(res, 400, false, "Error Adding Item", error);
             }
             return sendResponse(res, 200, true, "Item Added to store", {
                 ...payload,
@@ -111,10 +107,6 @@ class ItemControler {
     async updateItem(res, payload, itemId) {
         const {id, type} = res.user;
         const {name, price, quantity, currency, description, image} = payload;
-
-        if (type === "user1") {
-            return sendResponse(res, 400, false, "Access Denied", {});
-        }
 
         db.query({
             sql: "UPDATE store_items SET item_name = ?,item_price = ?,item_quantity = ?,item_currency = ?,item_description = ?,item_image = ? WHERE (id = ? AND store_id = ?)",

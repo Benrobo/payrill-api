@@ -9,7 +9,7 @@ class UserControler {
         const { id } = res.user;
         db.query(
             {
-                sql: "SELECT * FROM transaction WHERE (receiver_id = ? OR sender_id = ?)",
+                sql: "SELECT * FROM transaction WHERE (receiver_id = ? OR sender_id = ?) ORDER BY createdAt DESC",
                 timeout: 40000,
                 values: [id, id],
             },
